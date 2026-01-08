@@ -11,6 +11,8 @@
     #input { display: flex; margin-top: 10px; }
     #input input { flex: 1; padding: 10px; border: 1px solid #ccc; }
     #input button { padding: 10px; border: 1px solid #ccc; background: #007BFF; color: white; }
+    #controls { margin-top: 10px; }
+    #controls button { padding: 10px; margin-right: 5px; border: 1px solid #ccc; background: #28a745; color: white; }
   </style>
 </head>
 <body>
@@ -20,28 +22,54 @@
       <input type="text" id="messageInput" placeholder="Type your message...">
       <button id="sendButton">Send</button>
     </div>
+    <div id="controls">
+      <button id="enterButton">Enter Room</button>
+      <button id="leaveButton">Leave Room</button>
+    </div>
   </div>
 
   <script>
+    const API_URL = '/api/messages';
     const messagesDiv = document.getElementById('messages');
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
-
-    const API_URL = '/api/messages';
+    const enterButton = document.getElementById('enterButton');
+    const leaveButton = document.getElementById('leaveButton');
 
     // メッセージを取得して表示
     async function fetchMessages() {
       const response = await fetch(API_URL);
-      const messages = await response.json();
+      const data = await response.json();
 
-      messagesDiv.innerHTML = ''; // メッセージをクリア
-      messages.forEach((msg) => {
+      // メッセージを表示
+      messagesDiv.innerHTML = '';
+      data.messages.forEach((msg) => {
         const messageElement = document.createElement('div');
-        messageElement.textContent = msg.text;
+        messageElement.textContent = `${msg.text} (from ${msg.ip})`;
         messagesDiv.appendChild(messageElement);
       });
 
-      messagesDiv.scrollTop = messagesDiv.scrollHeight; // スクロールを一番下に
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // 入室
+    async function enterRoom() {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'enter' }),
+      });
+      fetchMessages();
+    }
+
+    // 退室
+    async function leaveRoom() {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'leave' }),
+      });
+      fetchMessages();
     }
 
     // メッセージを送信
@@ -51,15 +79,12 @@
         await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ action: 'message', text }),
         });
         messageInput.value = '';
-        fetchMessages(); // メッセージを再取得
+        fetchMessages();
       }
     }
-
-    // ポーリングで定期的にメッセージを取得
-    setInterval(fetchMessages, 3000); // 3秒ごとに取得
 
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
@@ -67,6 +92,9 @@
         sendMessage();
       }
     });
+
+    enterButton.addEventListener('click', enterRoom);
+    leaveButton.addEventListener('click', leaveRoom);
 
     // 初回メッセージ取得
     fetchMessages();
