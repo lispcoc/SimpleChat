@@ -241,11 +241,13 @@
             const usernameDisplay = document.getElementById('usernameDisplay');
             if (isInRoom) {
                 enterButton.style.display = 'none'; // 入室ボタンを非表示
+                usernameInput.style.display = 'none';
                 leaveButton.style.display = 'inline-block'; // 退室ボタンを表示
                 inputDiv.style.display = 'block'; // メッセージ入力フォームを表示
                 usernameDisplay.textContent = currentUsername; // ユーザー名を表示
             } else {
                 enterButton.style.display = 'inline-block'; // 入室ボタンを表示
+                usernameInput.style.display = 'inline-block';
                 leaveButton.style.display = 'none'; // 退室ボタンを非表示
                 inputDiv.style.display = 'none'; // メッセージ入力フォームを非表示
                 usernameDisplay.textContent = ''; // ユーザー名をクリア

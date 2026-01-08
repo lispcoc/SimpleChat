@@ -37,6 +37,8 @@ module.exports = async (req, res) => {
             timestamp: Date.now(),
             system: true
           })
+          lastUpdated = Date.now() // 更新タイムスタンプを更新
+
           res.status(200).json({ success: true, message: 'Entered the room' })
         } else if (action === 'leave') {
           // 退室処理
@@ -47,6 +49,8 @@ module.exports = async (req, res) => {
             timestamp: Date.now(),
             system: true
           })
+          lastUpdated = Date.now() // 更新タイムスタンプを更新
+
           res.status(200).json({ success: true, message: 'Left the room' })
         } else if (action === 'message') {
           // 入室しているか確認
