@@ -152,29 +152,37 @@
         }
         // メッセージを取得して表示
         async function fetchMessages() {
-            const response = await fetch(API_URL);
-            const data = await response.json();
-            if (response.status === 200) {
-                // メッセージを表示
-                messagesDiv.innerHTML = '';
-                data.messages.slice().reverse().forEach((msg) => {
-                    const messageElement = document.createElement('div');
-                    if (msg.system) {
-                        // システムメッセージのスタイル
-                        messageElement.style.color = 'gray';
-                        messageElement.textContent = `[SYSTEM] ${msg.text}`;
-                    } else {
-                        // 通常メッセージ
-                        const username = msg.username || 'Unknown'; // ユーザー名を表示
-                        messageElement.textContent = `${username}: ${msg.text} (${msg.timestamp})`;
-                    }
-                    messagesDiv.appendChild(messageElement);
-                });
+            try {
+                const response = await fetch(`${API_URL}?lastUpdated=${lastUpdated}`);
+                if (response.status === 200) {
+                    const data = await response.json();
+                    lastUpdated = data.lastUpdated; // サーバーから最新の更新タイムスタンプを取得
 
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    // メッセージを表示
+                    const messagesDiv = document.getElementById('messages');
+                    messagesDiv.innerHTML = ''; // メッセージをクリア
+                    data.messages.slice().reverse().forEach((msg) => {
+                        const messageElement = document.createElement('div');
+                        if (msg.system) {
+                            // システムメッセージのスタイル
+                            messageElement.style.color = 'gray';
+                            messageElement.textContent = `[SYSTEM] ${msg.text}`;
+                        } else {
+                            // 通常メッセージ
+                            const username = msg.username || 'Unknown';
+                            const formattedTime = new Date(msg.timestamp).toLocaleString();
+                            messageElement.textContent = `${username}: ${msg.text} (${formattedTime})`;
+                        }
+                        messagesDiv.appendChild(messageElement);
+                    });
 
-                // 入室者一覧を更新
-                fetchUsers();
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                    // 入室者一覧を更新
+                    fetchUsers();
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
             }
         }
 
@@ -260,39 +268,8 @@
         }
 
         // メッセージを定期的に取得
-        async function pollMessages() {
-            try {
-                const response = await fetch(`${API_URL}?lastUpdated=${lastUpdated}`);
-                if (response.status === 200) {
-                    const data = await response.json();
-                    lastUpdated = data.lastUpdated; // サーバーから最新の更新タイムスタンプを取得
-
-                    // メッセージを表示
-                    const messagesDiv = document.getElementById('messages');
-                    messagesDiv.innerHTML = '';
-                    data.messages.slice().reverse().forEach((msg) => {
-                        const messageElement = document.createElement('div');
-                        if (msg.system) {
-                            // システムメッセージのスタイル
-                            messageElement.style.color = 'gray';
-                            messageElement.textContent = `[SYSTEM] ${msg.text}`;
-                        } else {
-                            // 通常メッセージ
-                            const username = msg.username || 'Unknown'; // ユーザー名を表示
-                            const formattedTime = new Date(msg.timestamp).toLocaleString();
-                            messageElement.textContent = `${username}: ${msg.text} (${formattedTime})`;
-                        }
-                        messagesDiv.appendChild(messageElement);
-                    });
-
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-                    // 入室者一覧を更新
-                    fetchUsers();
-                }
-            } catch (error) {
-                console.error('Error fetching messages:', error);
-            }
+        function pollMessages(interval = 5000) {
+            setInterval(fetchMessages, interval); // 指定した間隔で fetchMessages を呼び出す
         }
 
         sendButton.addEventListener('click', sendMessage);
@@ -305,11 +282,10 @@
         enterButton.addEventListener('click', enterRoom);
         leaveButton.addEventListener('click', leaveRoom);
 
-        // 定期的にポーリング
-        setInterval(pollMessages, 5000); // 5秒ごとにサーバーをポーリング
-
         // 初回メッセージ取得
         fetchMessages();
+        // 定期的にメッセージを取得
+        pollMessages();
     </script>
 </body>
 
