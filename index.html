@@ -279,7 +279,8 @@
                         } else {
                             // 通常メッセージ
                             const username = msg.username || 'Unknown'; // ユーザー名を表示
-                            messageElement.textContent = `${username}: ${msg.text} (${msg.timestamp})`;
+                            const formattedTime = new Date(msg.timestamp).toLocaleString();
+                            messageElement.textContent = `${username}: ${msg.text} (${formattedTime})`;
                         }
                         messagesDiv.appendChild(messageElement);
                     });
