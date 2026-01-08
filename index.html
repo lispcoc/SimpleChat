@@ -91,6 +91,7 @@
 
             // 入室者一覧を表示
             usersDiv.innerHTML = '<h3>Active Users:</h3>';
+            console.log(data.users);
             data.users.forEach((userIp) => {
                 const userElement = document.createElement('div');
                 userElement.textContent = userIp;
@@ -113,7 +114,8 @@
                     messageElement.textContent = `[SYSTEM] ${msg.text}`;
                 } else {
                     // 通常メッセージ
-                    messageElement.textContent = `${msg.text} (from ${msg.ip})`;
+                    const username = msg.username || 'Unknown'; // username がない場合は "Unknown" を表示
+                    messageElement.textContent = `${msg.text} (from ${username})`;
                 }
                 messagesDiv.appendChild(messageElement);
             });

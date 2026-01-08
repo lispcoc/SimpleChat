@@ -42,11 +42,9 @@ module.exports = async (req, res) => {
         } else if (action === 'message') {
           // 入室しているか確認
           if (!users[ip]) {
-            res
-              .status(403)
-              .json({
-                error: 'You must enter the room before sending messages.'
-              })
+            res.status(403).json({
+              error: 'You must enter the room before sending messages.'
+            })
             return
           }
 
@@ -68,12 +66,10 @@ module.exports = async (req, res) => {
       }
     })
   } else if (req.method === 'GET') {
-    res
-      .status(200)
-      .json({
-        messages,
-        users: Object.entries(users).map(([ip, username]) => ({ ip, username }))
-      })
+    res.status(200).json({
+      messages,
+      users: Object.entries(users).map(([ip, username]) => ({ ip, username }))
+    })
   } else {
     res.status(405).json({ error: 'Method not allowed' })
   }
