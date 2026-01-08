@@ -1,5 +1,6 @@
 let messages = [] // メッセージを保存する簡易的なストレージ
 let users = {} // IP アドレスベースの入室者管理 (IP -> ユーザー名)
+let lastUpdated = Date.now() // 最後にメッセージが更新されたタイムスタンプ
 
 module.exports = async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress // IP アドレス取得
@@ -64,6 +65,7 @@ module.exports = async (req, res) => {
 
           const message = { text, timestamp: Date.now(), username: users[ip] }
           messages.push(message)
+          lastUpdated = Date.now() // 更新タイムスタンプを更新
 
           res.status(201).json({ success: true })
         } else {
@@ -74,11 +76,16 @@ module.exports = async (req, res) => {
       }
     })
   } else if (req.method === 'GET') {
-    res.status(200).json({
-      messages: messages.slice(-20), // 最新20件のメッセージを取得
-      users: Object.entries(users).map(([ip, username]) => ({ ip, username })),
-      clientIp: ip // クライアントの IP アドレスを追加
-    })
+    const clientLastUpdated = parseInt(req.query.lastUpdated, 10) || 0
+
+    if (clientLastUpdated < lastUpdated) {
+      res.status(200).json({
+        messages: messages.slice(-20), // 最新20件のメッセージを返す
+        lastUpdated // サーバーの最新更新タイムスタンプを返す
+      })
+    } else {
+      res.status(204).end() // 更新がない場合は 204 No Content を返す
+    }
   } else {
     res.status(405).json({ error: 'Method not allowed' })
   }
