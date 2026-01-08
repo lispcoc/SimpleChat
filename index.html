@@ -138,6 +138,7 @@
             // 自分が入室済みか確認
             if (data.users.some((user) => user.ip === data.clientIp)) {
                 isInRoom = true; // 入室状態を更新
+                currentUsername = user.username; // 現在のユーザー名を保存
             } else {
                 isInRoom = false; // 入室していない状態に更新
             }
