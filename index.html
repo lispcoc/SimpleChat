@@ -44,7 +44,6 @@
 
         #users {
             overflow-y: auto;
-            height: 300px;
             border: 1px solid #ddd;
             padding: 10px;
         }
@@ -69,6 +68,7 @@
 
         #controls {
             margin-top: 10px;
+            padding: 10px;
         }
 
         #controls button {
@@ -82,27 +82,28 @@
 </head>
 
 <body>
+    <div id="controls">
+        <input type="text" id="usernameInput" placeholder="Enter your username">
+        <button id="enterButton">Enter Room</button>
+        <button id="leaveButton" style="display: none;">Leave Room</button>
+    </div>
+    <div id="inputDiv" style="margin-top: 10px; display: none;">
+        <input type="text" id="messageInput" placeholder="Type your message..." style="width: 80%;">
+        <button id="sendButton">Send</button>
+    </div>
+
+    <!-- 入室者リスト -->
+    <div id="userSection" style="flex: 1; padding: 10px;">
+        <h3>Active Users</h3>
+        <div id="users" style="overflow-y: auto; border: 1px solid #ddd; padding: 10px;"></div>
+    </div>
     <div id="chatContainer" style="display: flex; height: 100%;">
+
         <!-- メッセージ欄 -->
         <div id="messageSection" style="flex: 3; border-right: 1px solid #ccc; padding: 10px;">
             <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;"></div>
-            <div id="inputDiv" style="margin-top: 10px; display: none;">
-                <input type="text" id="messageInput" placeholder="Type your message..." style="width: 80%;">
-                <button id="sendButton">Send</button>
-            </div>
         </div>
 
-        <!-- 入室者リスト -->
-        <div id="userSection" style="flex: 1; padding: 10px;">
-            <h3>Active Users</h3>
-            <div id="users" style="overflow-y: auto; height: 300px; border: 1px solid #ddd; padding: 10px;"></div>
-        </div>
-
-        <div id="controls">
-            <input type="text" id="usernameInput" placeholder="Enter your username">
-            <button id="enterButton">Enter Room</button>
-            <button id="leaveButton" style="display: none;">Leave Room</button>
-        </div>
     </div>
 
     <script>
