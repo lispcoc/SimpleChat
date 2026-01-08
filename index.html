@@ -127,50 +127,53 @@
             const response = await fetch(API_URL);
             const data = await response.json();
 
-            // 入室者一覧を表示
-            const usersDiv = document.getElementById('users');
-            usersDiv.innerHTML = ''; // リストをクリア
-            data.users.forEach((user) => {
-                const userElement = document.createElement('div');
-                userElement.textContent = user.username || 'Unknown'; // ユーザー名を表示
-                usersDiv.appendChild(userElement);
-            });
+            if (response.status === 200) {
+                // 入室者一覧を表示
+                const usersDiv = document.getElementById('users');
+                usersDiv.innerHTML = ''; // リストをクリア
+                data.users.forEach((user) => {
+                    const userElement = document.createElement('div');
+                    userElement.textContent = user.username || 'Unknown'; // ユーザー名を表示
+                    usersDiv.appendChild(userElement);
+                });
 
-            // 自分が入室済みか確認
-            if (data.users.some((user) => user.ip === data.clientIp)) {
-                isInRoom = true; // 入室状態を更新
-                currentUsername = user.username; // 現在のユーザー名を保存
-            } else {
-                isInRoom = false; // 入室していない状態に更新
+                // 自分が入室済みか確認
+                if (data.users.some((user) => user.ip === data.clientIp)) {
+                    isInRoom = true; // 入室状態を更新
+                    currentUsername = user.username; // 現在のユーザー名を保存
+                } else {
+                    isInRoom = false; // 入室していない状態に更新
+                }
+
+                updateUI(); // UI を更新
             }
-
-            updateUI(); // UI を更新
         }
         // メッセージを取得して表示
         async function fetchMessages() {
             const response = await fetch(API_URL);
             const data = await response.json();
+            if (response.status === 200) {
+                // メッセージを表示
+                messagesDiv.innerHTML = '';
+                data.messages.slice().reverse().forEach((msg) => {
+                    const messageElement = document.createElement('div');
+                    if (msg.system) {
+                        // システムメッセージのスタイル
+                        messageElement.style.color = 'gray';
+                        messageElement.textContent = `[SYSTEM] ${msg.text}`;
+                    } else {
+                        // 通常メッセージ
+                        const username = msg.username || 'Unknown'; // ユーザー名を表示
+                        messageElement.textContent = `${username}: ${msg.text} (${msg.timestamp})`;
+                    }
+                    messagesDiv.appendChild(messageElement);
+                });
 
-            // メッセージを表示
-            messagesDiv.innerHTML = '';
-            data.messages.slice().reverse().forEach((msg) => {
-                const messageElement = document.createElement('div');
-                if (msg.system) {
-                    // システムメッセージのスタイル
-                    messageElement.style.color = 'gray';
-                    messageElement.textContent = `[SYSTEM] ${msg.text}`;
-                } else {
-                    // 通常メッセージ
-                    const username = msg.username || 'Unknown'; // ユーザー名を表示
-                    messageElement.textContent = `${username}: ${msg.text} (${msg.timestamp})`;
-                }
-                messagesDiv.appendChild(messageElement);
-            });
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            // 入室者一覧を更新
-            fetchUsers();
+                // 入室者一覧を更新
+                fetchUsers();
+            }
         }
 
         // 入室
