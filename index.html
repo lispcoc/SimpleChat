@@ -161,7 +161,7 @@
                 } else {
                     // 通常メッセージ
                     const username = msg.username || 'Unknown'; // ユーザー名を表示
-                    messageElement.textContent = `${msg.text} (from ${username})`;
+                    messageElement.textContent = `${username}: ${msg.text} (${msg.timestamp})`;
                 }
                 messagesDiv.appendChild(messageElement);
             });
