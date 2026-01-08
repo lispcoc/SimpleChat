@@ -61,14 +61,14 @@
 <body>
     <div id="chat">
         <div id="messages"></div>
-        <div id="input">
+        <div id="input" style="display: none;">
             <input type="text" id="messageInput" placeholder="Type your message...">
             <button id="sendButton">Send</button>
         </div>
         <div id="controls">
             <input type="text" id="usernameInput" placeholder="Enter your username">
             <button id="enterButton">Enter Room</button>
-            <button id="leaveButton">Leave Room</button>
+            <button id="leaveButton" style="display: none;">Leave Room</button>
         </div>
     </div>
 
@@ -77,12 +77,15 @@
     <script>
         const API_URL = '/api/messages';
         const messagesDiv = document.getElementById('messages');
+        const inputDiv = document.getElementById('input');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
         const usernameInput = document.getElementById('usernameInput');
         const enterButton = document.getElementById('enterButton');
         const leaveButton = document.getElementById('leaveButton');
         const usersDiv = document.getElementById('users');
+
+        let isInRoom = false; // 入室状態を管理するフラグ
 
         // 入室者一覧を取得して表示
         async function fetchUsers() {
@@ -141,6 +144,8 @@
             });
 
             if (response.ok) {
+                isInRoom = true; // 入室状態を更新
+                updateUI(); // UI を更新
                 fetchMessages();
             } else {
                 const errorData = await response.json();
@@ -157,6 +162,8 @@
             });
 
             if (response.ok) {
+                isInRoom = false; // 入室状態を更新
+                updateUI(); // UI を更新
                 fetchMessages();
             } else {
                 const errorData = await response.json();
@@ -179,8 +186,21 @@
                     fetchMessages();
                 } else {
                     const errorData = await response.json();
-                    alert(errorData.error); // エラーメッセージをアラートで表示
+                    alert(errorData.error);
                 }
+            }
+        }
+
+        // UI の更新
+        function updateUI() {
+            if (isInRoom) {
+                enterButton.style.display = 'none'; // 入室ボタンを非表示
+                leaveButton.style.display = 'inline-block'; // 退室ボタンを表示
+                inputDiv.style.display = 'block'; // メッセージ入力フォームを表示
+            } else {
+                enterButton.style.display = 'inline-block'; // 入室ボタンを表示
+                leaveButton.style.display = 'none'; // 退室ボタンを非表示
+                inputDiv.style.display = 'none'; // メッセージ入力フォームを非表示
             }
         }
 
