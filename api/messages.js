@@ -4,6 +4,8 @@ module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  console.log('Request method:', req.method);
+  console.log('Request body:', req.body);
 
   if (req.method === 'GET') {
     // メッセージを取得
