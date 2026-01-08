@@ -81,11 +81,13 @@ module.exports = async (req, res) => {
     })
   } else if (req.method === 'GET') {
     const clientLastUpdated = parseInt(req.query.lastUpdated, 10) || 0
+    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress; // クライアントの IP アドレスを取得
 
     if (clientLastUpdated < lastUpdated) {
       res.status(200).json({
         messages: messages.slice(-20), // 最新20件のメッセージを返す
-        users: users,
+        users: Object.entries(users).map(([ip, username]) => ({ ip, username })), // 入室者リスト
+        clientIp, // クライアントの IP アドレスを追加
         lastUpdated // サーバーの最新更新タイムスタンプを返す
       })
     } else {
