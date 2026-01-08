@@ -85,6 +85,7 @@ module.exports = async (req, res) => {
     if (clientLastUpdated < lastUpdated) {
       res.status(200).json({
         messages: messages.slice(-20), // 最新20件のメッセージを返す
+        users: users,
         lastUpdated // サーバーの最新更新タイムスタンプを返す
       })
     } else {
