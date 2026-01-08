@@ -75,7 +75,7 @@ module.exports = async (req, res) => {
     })
   } else if (req.method === 'GET') {
     res.status(200).json({
-      messages,
+      messages: messages.slice(-20), // 最新20件のメッセージを取得
       users: Object.entries(users).map(([ip, username]) => ({ ip, username })),
       clientIp: ip // クライアントの IP アドレスを追加
     })

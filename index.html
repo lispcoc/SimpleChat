@@ -95,7 +95,7 @@
 
     <!-- 入室者リスト -->
     <div id="userSection" style="flex: 1; padding: 10px;">
-        <h3>Active Users</h3>
+        <span style="margin-right: 10px; font-weight: bold;">現在の入室者: </span>
         <div id="users" style="overflow-y: auto; border: 1px solid #ddd; padding: 10px;"></div>
     </div>
     <div id="chatContainer" style="display: flex; height: 100%;">
@@ -152,7 +152,7 @@
 
             // メッセージを表示
             messagesDiv.innerHTML = '';
-            data.messages.forEach((msg) => {
+            data.messages.slice().reverse().forEach((msg) => {
                 const messageElement = document.createElement('div');
                 if (msg.system) {
                     // システムメッセージのスタイル
@@ -160,7 +160,7 @@
                     messageElement.textContent = `[SYSTEM] ${msg.text}`;
                 } else {
                     // 通常メッセージ
-                    const username = msg.username || 'Unknown'; // username がない場合は "Unknown" を表示
+                    const username = msg.username || 'Unknown'; // ユーザー名を表示
                     messageElement.textContent = `${msg.text} (from ${username})`;
                 }
                 messagesDiv.appendChild(messageElement);
