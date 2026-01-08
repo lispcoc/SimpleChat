@@ -28,13 +28,30 @@
     </div>
   </div>
 
-  <script>
+  <div id="users"></div> <!-- 入室者一覧を表示するエリア -->
+
+    <script>
     const API_URL = '/api/messages';
     const messagesDiv = document.getElementById('messages');
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
     const enterButton = document.getElementById('enterButton');
     const leaveButton = document.getElementById('leaveButton');
+    const usersDiv = document.getElementById('users');
+
+    // 入室者一覧を取得して表示
+    async function fetchUsers() {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        // 入室者一覧を表示
+        usersDiv.innerHTML = '<h3>Active Users:</h3>';
+        data.users.forEach((userIp) => {
+            const userElement = document.createElement('div');
+            userElement.textContent = userIp;
+            usersDiv.appendChild(userElement);
+        });
+    }
 
     // メッセージを取得して表示
     async function fetchMessages() {
@@ -44,19 +61,22 @@
         // メッセージを表示
         messagesDiv.innerHTML = '';
         data.messages.forEach((msg) => {
-        const messageElement = document.createElement('div');
-        if (msg.system) {
-            // システムメッセージのスタイル
-            messageElement.style.color = 'gray';
-            messageElement.textContent = `[SYSTEM] ${msg.text}`;
-        } else {
-            // 通常メッセージ
-            messageElement.textContent = `${msg.text} (from ${msg.ip})`;
-        }
-        messagesDiv.appendChild(messageElement);
+            const messageElement = document.createElement('div');
+            if (msg.system) {
+                // システムメッセージのスタイル
+                messageElement.style.color = 'gray';
+                messageElement.textContent = `[SYSTEM] ${msg.text}`;
+            } else {
+                // 通常メッセージ
+                messageElement.textContent = `${msg.text} (from ${msg.ip})`;
+            }
+            messagesDiv.appendChild(messageElement);
         });
 
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        // 入室者一覧を更新
+        fetchUsers();
     }
 
     // 入室
@@ -79,25 +99,31 @@
       fetchMessages();
     }
 
-    // メッセージを送信
+    // メッセージ送信
     async function sendMessage() {
-      const text = messageInput.value;
-      if (text) {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'message', text }),
-        });
-        messageInput.value = '';
-        fetchMessages();
-      }
+        const text = messageInput.value;
+        if (text) {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'message', text }),
+            });
+
+            if (response.ok) {
+                messageInput.value = '';
+                fetchMessages();
+            } else {
+                const errorData = await response.json();
+                alert(errorData.error); // エラーメッセージをアラートで表示
+            }
+        }
     }
 
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
     });
 
     enterButton.addEventListener('click', enterRoom);

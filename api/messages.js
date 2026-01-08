@@ -26,6 +26,12 @@ module.exports = async (req, res) => {
           messages.push({ text: `User ${ip} has left the room.`, timestamp: Date.now(), system: true });
           res.status(200).json({ success: true, message: 'Left the room' });
         } else if (action === 'message') {
+          // 入室しているか確認
+          if (!users[ip]) {
+            res.status(403).json({ error: 'You must enter the room before sending messages.' });
+            return;
+          }
+
           // メッセージ送信処理
           if (!text) {
             res.status(400).json({ error: 'Text is required' });
