@@ -16,6 +16,14 @@ module.exports = async (req, res) => {
         const { action, text, username } = parsedBody
 
         if (action === 'enter') {
+          // 既に入室している場合は無視
+          if (users[ip]) {
+            res
+              .status(200)
+              .json({ success: true, message: 'Already in the room' })
+            return
+          }
+
           // 入室処理
           if (!username || username.trim() === '') {
             res.status(400).json({ error: 'Username is required' })
