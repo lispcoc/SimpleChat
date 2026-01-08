@@ -1,71 +1,80 @@
-let messages = []; // メッセージを保存する簡易的なストレージ
-let users = {}; // IP アドレスベースの入室者管理
+let messages = [] // メッセージを保存する簡易的なストレージ
+let users = {} // IP アドレスベースの入室者管理 (IP -> ユーザー名)
 
 module.exports = async (req, res) => {
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress; // IP アドレス取得
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress // IP アドレス取得
 
   if (req.method === 'POST') {
-    let body = '';
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
+    let body = ''
+    req.on('data', chunk => {
+      body += chunk.toString()
+    })
 
     req.on('end', () => {
       try {
-        const parsedBody = JSON.parse(body);
-        const { action, text } = parsedBody;
+        const parsedBody = JSON.parse(body)
+        const { action, text, username } = parsedBody
 
         if (action === 'enter') {
           // 入室処理
-          users[ip] = Date.now();
-          messages.push({ text: `User ${ip} has entered the room.`, timestamp: Date.now(), system: true });
-          res.status(200).json({ success: true, message: 'Entered the room' });
+          if (!username || username.trim() === '') {
+            res.status(400).json({ error: 'Username is required' })
+            return
+          }
+
+          users[ip] = username.trim() // IP アドレスとユーザー名を関連付け
+          messages.push({
+            text: `User ${username} has entered the room.`,
+            timestamp: Date.now(),
+            system: true
+          })
+          res.status(200).json({ success: true, message: 'Entered the room' })
         } else if (action === 'leave') {
           // 退室処理
-          delete users[ip];
-          messages.push({ text: `User ${ip} has left the room.`, timestamp: Date.now(), system: true });
-          res.status(200).json({ success: true, message: 'Left the room' });
+          const username = users[ip]
+          delete users[ip]
+          messages.push({
+            text: `User ${username || ip} has left the room.`,
+            timestamp: Date.now(),
+            system: true
+          })
+          res.status(200).json({ success: true, message: 'Left the room' })
         } else if (action === 'message') {
           // 入室しているか確認
           if (!users[ip]) {
-            res.status(403).json({ error: 'You must enter the room before sending messages.' });
-            return;
+            res
+              .status(403)
+              .json({
+                error: 'You must enter the room before sending messages.'
+              })
+            return
           }
 
           // メッセージ送信処理
           if (!text) {
-            res.status(400).json({ error: 'Text is required' });
-            return;
+            res.status(400).json({ error: 'Text is required' })
+            return
           }
 
-          const message = { text, timestamp: Date.now(), ip };
-          messages.push(message);
+          const message = { text, timestamp: Date.now(), username: users[ip] }
+          messages.push(message)
 
-          // 入室者を更新
-          users[ip] = Date.now();
-
-          // 古いメッセージを削除
-          const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
-          messages = messages.filter((msg) => msg.timestamp > tenMinutesAgo);
-
-          // 古い入室者を削除
-          for (const userIp in users) {
-            if (users[userIp] < tenMinutesAgo) {
-              delete users[userIp];
-            }
-          }
-
-          res.status(201).json({ success: true });
+          res.status(201).json({ success: true })
         } else {
-          res.status(400).json({ error: 'Invalid action' });
+          res.status(400).json({ error: 'Invalid action' })
         }
       } catch (error) {
-        res.status(400).json({ error: 'Invalid JSON' });
+        res.status(400).json({ error: 'Invalid JSON' })
       }
-    });
+    })
   } else if (req.method === 'GET') {
-    res.status(200).json({ messages, users: Object.keys(users) });
+    res
+      .status(200)
+      .json({
+        messages,
+        users: Object.entries(users).map(([ip, username]) => ({ ip, username }))
+      })
   } else {
-    res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ error: 'Method not allowed' })
   }
-};
+}

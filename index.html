@@ -1,136 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Chat</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    #chat { max-width: 600px; margin: 20px auto; padding: 10px; border: 1px solid #ccc; }
-    #messages { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; }
-    #input { display: flex; margin-top: 10px; }
-    #input input { flex: 1; padding: 10px; border: 1px solid #ccc; }
-    #input button { padding: 10px; border: 1px solid #ccc; background: #007BFF; color: white; }
-    #controls { margin-top: 10px; }
-    #controls button { padding: 10px; margin-right: 5px; border: 1px solid #ccc; background: #28a745; color: white; }
-  </style>
-</head>
-<body>
-  <div id="chat">
-    <div id="messages"></div>
-    <div id="input">
-      <input type="text" id="messageInput" placeholder="Type your message...">
-      <button id="sendButton">Send</button>
-    </div>
-    <div id="controls">
-      <button id="enterButton">Enter Room</button>
-      <button id="leaveButton">Leave Room</button>
-    </div>
-  </div>
 
-  <div id="users"></div> <!-- 入室者一覧を表示するエリア -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #chat {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        #input {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        #input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        #input button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #007BFF;
+            color: white;
+        }
+
+        #controls {
+            margin-top: 10px;
+        }
+
+        #controls button {
+            padding: 10px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            background: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chat">
+        <div id="messages"></div>
+        <div id="input">
+            <input type="text" id="messageInput" placeholder="Type your message...">
+            <button id="sendButton">Send</button>
+        </div>
+        <div id="controls">
+            <input type="text" id="usernameInput" placeholder="Enter your username">
+            <button id="enterButton">Enter Room</button>
+            <button id="leaveButton">Leave Room</button>
+        </div>
+    </div>
+
+    <div id="users"></div> <!-- 入室者一覧を表示するエリア -->
 
     <script>
-    const API_URL = '/api/messages';
-    const messagesDiv = document.getElementById('messages');
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
-    const enterButton = document.getElementById('enterButton');
-    const leaveButton = document.getElementById('leaveButton');
-    const usersDiv = document.getElementById('users');
+        const API_URL = '/api/messages';
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const usernameInput = document.getElementById('usernameInput');
+        const enterButton = document.getElementById('enterButton');
+        const leaveButton = document.getElementById('leaveButton');
+        const usersDiv = document.getElementById('users');
 
-    // 入室者一覧を取得して表示
-    async function fetchUsers() {
-        const response = await fetch(API_URL);
-        const data = await response.json();
+        // 入室者一覧を取得して表示
+        async function fetchUsers() {
+            const response = await fetch(API_URL);
+            const data = await response.json();
 
-        // 入室者一覧を表示
-        usersDiv.innerHTML = '<h3>Active Users:</h3>';
-        data.users.forEach((userIp) => {
-            const userElement = document.createElement('div');
-            userElement.textContent = userIp;
-            usersDiv.appendChild(userElement);
-        });
-    }
+            // 入室者一覧を表示
+            usersDiv.innerHTML = '<h3>Active Users:</h3>';
+            data.users.forEach((userIp) => {
+                const userElement = document.createElement('div');
+                userElement.textContent = userIp;
+                usersDiv.appendChild(userElement);
+            });
+        }
 
-    // メッセージを取得して表示
-    async function fetchMessages() {
-        const response = await fetch(API_URL);
-        const data = await response.json();
+        // メッセージを取得して表示
+        async function fetchMessages() {
+            const response = await fetch(API_URL);
+            const data = await response.json();
 
-        // メッセージを表示
-        messagesDiv.innerHTML = '';
-        data.messages.forEach((msg) => {
-            const messageElement = document.createElement('div');
-            if (msg.system) {
-                // システムメッセージのスタイル
-                messageElement.style.color = 'gray';
-                messageElement.textContent = `[SYSTEM] ${msg.text}`;
-            } else {
-                // 通常メッセージ
-                messageElement.textContent = `${msg.text} (from ${msg.ip})`;
+            // メッセージを表示
+            messagesDiv.innerHTML = '';
+            data.messages.forEach((msg) => {
+                const messageElement = document.createElement('div');
+                if (msg.system) {
+                    // システムメッセージのスタイル
+                    messageElement.style.color = 'gray';
+                    messageElement.textContent = `[SYSTEM] ${msg.text}`;
+                } else {
+                    // 通常メッセージ
+                    messageElement.textContent = `${msg.text} (from ${msg.ip})`;
+                }
+                messagesDiv.appendChild(messageElement);
+            });
+
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // 入室者一覧を更新
+            fetchUsers();
+        }
+
+        // 入室
+        async function enterRoom() {
+            const username = usernameInput.value.trim();
+            if (!username) {
+                alert('Please enter a username.');
+                return;
             }
-            messagesDiv.appendChild(messageElement);
-        });
 
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-        // 入室者一覧を更新
-        fetchUsers();
-    }
-
-    // 入室
-    async function enterRoom() {
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'enter' }),
-      });
-      fetchMessages();
-    }
-
-    // 退室
-    async function leaveRoom() {
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'leave' }),
-      });
-      fetchMessages();
-    }
-
-    // メッセージ送信
-    async function sendMessage() {
-        const text = messageInput.value;
-        if (text) {
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'message', text }),
+                body: JSON.stringify({ action: 'enter', username }),
             });
 
             if (response.ok) {
-                messageInput.value = '';
                 fetchMessages();
             } else {
                 const errorData = await response.json();
-                alert(errorData.error); // エラーメッセージをアラートで表示
+                alert(errorData.error);
             }
         }
-    }
 
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
+        // 退室
+        async function leaveRoom() {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'leave' }),
+            });
+
+            if (response.ok) {
+                fetchMessages();
+            } else {
+                const errorData = await response.json();
+                alert(errorData.error);
+            }
         }
-    });
 
-    enterButton.addEventListener('click', enterRoom);
-    leaveButton.addEventListener('click', leaveRoom);
+        // メッセージ送信
+        async function sendMessage() {
+            const text = messageInput.value;
+            if (text) {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'message', text }),
+                });
 
-    // 初回メッセージ取得
-    fetchMessages();
-  </script>
+                if (response.ok) {
+                    messageInput.value = '';
+                    fetchMessages();
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.error); // エラーメッセージをアラートで表示
+                }
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        enterButton.addEventListener('click', enterRoom);
+        leaveButton.addEventListener('click', leaveRoom);
+
+        // 初回メッセージ取得
+        fetchMessages();
+    </script>
 </body>
+
 </html>
