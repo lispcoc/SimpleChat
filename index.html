@@ -94,12 +94,20 @@
 
             // 入室者一覧を表示
             usersDiv.innerHTML = '<h3>Active Users:</h3>';
-            console.log(data.users);
             data.users.forEach((user) => {
                 const userElement = document.createElement('div');
-                userElement.textContent = user.username;
+                userElement.textContent = `${user.username} (${user.ip})`;
                 usersDiv.appendChild(userElement);
             });
+
+            // 自分が入室済みか確認
+            if (data.users.some((user) => user.ip === data.clientIp)) {
+                isInRoom = true; // 入室状態を更新
+            } else {
+                isInRoom = false; // 入室していない状態に更新
+            }
+
+            updateUI(); // UI を更新
         }
 
         // メッセージを取得して表示

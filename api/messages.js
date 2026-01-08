@@ -76,7 +76,8 @@ module.exports = async (req, res) => {
   } else if (req.method === 'GET') {
     res.status(200).json({
       messages,
-      users: Object.entries(users).map(([ip, username]) => ({ ip, username }))
+      users: Object.entries(users).map(([ip, username]) => ({ ip, username })),
+      clientIp: ip // クライアントの IP アドレスを追加
     })
   } else {
     res.status(405).json({ error: 'Method not allowed' })
