@@ -1,6 +1,10 @@
 let messages = []; // メッセージを保存する簡易的なストレージ
 
 module.exports = (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'GET') {
     // メッセージを取得
     res.status(200).json(messages);
