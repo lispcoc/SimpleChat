@@ -19,9 +19,32 @@
             border: 1px solid #ccc;
         }
 
+        #chatContainer {
+            display: flex;
+            height: 100%;
+        }
+
+        #messageSection {
+            flex: 3;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        #userSection {
+            flex: 1;
+            padding: 10px;
+        }
+
         #messages {
             height: 300px;
             overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        #users {
+            overflow-y: auto;
+            height: 300px;
             border: 1px solid #ddd;
             padding: 10px;
         }
@@ -59,12 +82,22 @@
 </head>
 
 <body>
-    <div id="chat">
-        <div id="messages"></div>
-        <div id="input" style="display: none;">
-            <input type="text" id="messageInput" placeholder="Type your message...">
-            <button id="sendButton">Send</button>
+    <div id="chatContainer" style="display: flex; height: 100%;">
+        <!-- メッセージ欄 -->
+        <div id="messageSection" style="flex: 3; border-right: 1px solid #ccc; padding: 10px;">
+            <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;"></div>
+            <div id="inputDiv" style="margin-top: 10px; display: none;">
+                <input type="text" id="messageInput" placeholder="Type your message..." style="width: 80%;">
+                <button id="sendButton">Send</button>
+            </div>
         </div>
+
+        <!-- 入室者リスト -->
+        <div id="userSection" style="flex: 1; padding: 10px;">
+            <h3>Active Users</h3>
+            <div id="users" style="overflow-y: auto; height: 300px; border: 1px solid #ddd; padding: 10px;"></div>
+        </div>
+
         <div id="controls">
             <input type="text" id="usernameInput" placeholder="Enter your username">
             <button id="enterButton">Enter Room</button>
@@ -72,12 +105,10 @@
         </div>
     </div>
 
-    <div id="users"></div> <!-- 入室者一覧を表示するエリア -->
-
     <script>
         const API_URL = '/api/messages';
         const messagesDiv = document.getElementById('messages');
-        const inputDiv = document.getElementById('input');
+        const inputDiv = document.getElementById('inputDiv');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
         const usernameInput = document.getElementById('usernameInput');
@@ -93,10 +124,11 @@
             const data = await response.json();
 
             // 入室者一覧を表示
-            usersDiv.innerHTML = '<h3>Active Users:</h3>';
+            const usersDiv = document.getElementById('users');
+            usersDiv.innerHTML = ''; // リストをクリア
             data.users.forEach((user) => {
                 const userElement = document.createElement('div');
-                userElement.textContent = `${user.username} (${user.ip})`;
+                userElement.textContent = user.username || 'Unknown'; // ユーザー名を表示
                 usersDiv.appendChild(userElement);
             });
 
@@ -109,7 +141,6 @@
 
             updateUI(); // UI を更新
         }
-
         // メッセージを取得して表示
         async function fetchMessages() {
             const response = await fetch(API_URL);
@@ -203,10 +234,12 @@
         function updateUI() {
             if (isInRoom) {
                 enterButton.style.display = 'none'; // 入室ボタンを非表示
+                usernameInput.style.display = 'none';
                 leaveButton.style.display = 'inline-block'; // 退室ボタンを表示
                 inputDiv.style.display = 'block'; // メッセージ入力フォームを表示
             } else {
                 enterButton.style.display = 'inline-block'; // 入室ボタンを表示
+                usernameInput.style.display = 'block';
                 leaveButton.style.display = 'none'; // 退室ボタンを非表示
                 inputDiv.style.display = 'none'; // メッセージ入力フォームを非表示
             }
