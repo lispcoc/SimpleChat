@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    #chat { max-width: 600px; margin: 20px auto; padding: 10px; border: 1px solid #ccc; }
+    #messages { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; }
+    #input { display: flex; margin-top: 10px; }
+    #input input { flex: 1; padding: 10px; border: 1px solid #ccc; }
+    #input button { padding: 10px; border: 1px solid #ccc; background: #007BFF; color: white; }
+  </style>
+</head>
+<body>
+  <div id="chat">
+    <div id="messages"></div>
+    <div id="input">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button id="sendButton">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+
+    const API_URL = '/api/messages';
+
+    // メッセージを取得して表示
+    async function fetchMessages() {
+      const response = await fetch(API_URL);
+      const messages = await response.json();
+
+      messagesDiv.innerHTML = ''; // メッセージをクリア
+      messages.forEach((msg) => {
+        const messageElement = document.createElement('div');
+        messageElement.textContent = msg.text;
+        messagesDiv.appendChild(messageElement);
+      });
+
+      messagesDiv.scrollTop = messagesDiv.scrollHeight; // スクロールを一番下に
+    }
+
+    // メッセージを送信
+    async function sendMessage() {
+      const text = messageInput.value;
+      if (text) {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        messageInput.value = '';
+        fetchMessages(); // メッセージを再取得
+      }
+    }
+
+    // ポーリングで定期的にメッセージを取得
+    setInterval(fetchMessages, 3000); // 3秒ごとに取得
+
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // 初回メッセージ取得
+    fetchMessages();
+  </script>
+</body>
+</html>
