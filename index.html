@@ -38,18 +38,25 @@
 
     // メッセージを取得して表示
     async function fetchMessages() {
-      const response = await fetch(API_URL);
-      const data = await response.json();
+        const response = await fetch(API_URL);
+        const data = await response.json();
 
-      // メッセージを表示
-      messagesDiv.innerHTML = '';
-      data.messages.forEach((msg) => {
+        // メッセージを表示
+        messagesDiv.innerHTML = '';
+        data.messages.forEach((msg) => {
         const messageElement = document.createElement('div');
-        messageElement.textContent = `${msg.text} (from ${msg.ip})`;
+        if (msg.system) {
+            // システムメッセージのスタイル
+            messageElement.style.color = 'gray';
+            messageElement.textContent = `[SYSTEM] ${msg.text}`;
+        } else {
+            // 通常メッセージ
+            messageElement.textContent = `${msg.text} (from ${msg.ip})`;
+        }
         messagesDiv.appendChild(messageElement);
-      });
+        });
 
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
     // 入室
