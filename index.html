@@ -91,7 +91,7 @@
       <button id="enterButton">入室</button>
       <button id="leaveButton" style="display: none">退室</button>
     </div>
-    <div id="inputDiv" style="margin-top: 10px; display: none">
+    <div id="inputDiv" style="display: none">
       <span
         id="usernameDisplay"
         style="margin-right: 10px; font-weight: bold"
@@ -209,7 +209,7 @@
                 } else {
                   // 通常メッセージ
                   const username = msg.username || 'Unknown'
-                  messageElement.textContent = `${username}: ${msg.text} <span class='timestamp'>(${formattedTime})</span>`
+                  messageElement.textContent = `${username}: ${msg.text}`
                 }
                 messagesDiv.appendChild(messageElement)
                 if (msg.timestamp) {
@@ -217,7 +217,7 @@
                   const timestampElement = document.createElement('span')
                   timestampElement.className = 'timestamp'
                   timestampElement.textContent = `(${formattedTime})`
-                  messagesDiv.appendChild(timestampElement)
+                  messageElement.appendChild(timestampElement)
                 }
                 const hr = document.createElement('hr')
                 messagesDiv.appendChild(hr)
