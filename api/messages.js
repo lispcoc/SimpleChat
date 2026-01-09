@@ -162,7 +162,7 @@ module.exports = async (req, res) => {
         // データベースの更新
         const query = `
         UPDATE rooms
-        SET name = $2, description = $3, specialKeys = $4
+        SET name = $2, description = $3, special_keys = $4
         WHERE id = $1
       `
         const values = [roomId, room.name, room.description, room.specialKeys]
