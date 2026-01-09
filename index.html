@@ -57,6 +57,10 @@
         overflow-y: auto;
       }
 
+      #messageInput {
+        margin-right: 20%;
+      }
+
       #input {
         display: flex;
         margin-top: 10px;
@@ -64,16 +68,25 @@
 
       #inputDiv {
         max-width: 600px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      #inputDiv span {
+        white-space: nowrap;
       }
 
       #inputDiv input {
         flex: 1;
-        padding: 10px;
+        padding: 2px;
+        min-width: 0; /* 必要以上に広がらないようにする */
         border: 1px solid #ccc;
       }
 
       #inputDiv button {
         padding: 2px;
+        white-space: nowrap;
       }
 
       #controls {
@@ -102,15 +115,11 @@
         <button id="leaveButton" style="display: none">退室</button>
       </div>
       <div id="inputDiv" style="display: none">
-        <span
-          id="usernameDisplay"
-          style="margin-right: 10px; font-weight: bold"
-        ></span>
+        <span id="usernameDisplay"></span>
         <input
           type="text"
           id="messageInput"
           placeholder="Type your message..."
-          style="width: 80%"
         />
         <button id="sendButton" style="white-space: nowrap">発言</button>
       </div>
