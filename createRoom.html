@@ -52,30 +52,30 @@
   <body>
     <h1>Create a New Room</h1>
     <form id="createRoomForm">
-      <label for="roomName">Room Name</label>
+      <label for="roomName">部屋の名前 (必須)</label>
       <input
         type="text"
         id="roomName"
         name="roomName"
-        placeholder="Enter room name"
+        placeholder="部屋の名前"
         required
       />
 
-      <label for="roomDescription">Room Description</label>
+      <label for="roomDescription">部屋の説明 (必須)</label>
       <textarea
         id="roomDescription"
         name="roomDescription"
-        placeholder="Enter room description"
+        placeholder="部屋の説明"
         rows="4"
         required
       ></textarea>
 
-      <label for="roomPassword">Room Password</label>
+      <label for="roomPassword">パスワード (必須)</label>
       <input
         type="password"
         id="roomPassword"
         name="roomPassword"
-        placeholder="Enter room password"
+        placeholder="パスワード"
         required
       />
 
@@ -92,7 +92,6 @@
         name="roomSpecialText_1"
         placeholder="大吉&#13;&#10;中吉&#13;&#10;吉&#13;&#10;末吉&#13;&#10;凶"
         rows="4"
-        required
       ></textarea>
 
       <button type="submit">Create Room</button>
