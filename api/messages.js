@@ -2,17 +2,9 @@ let messages = [] // メッセージを保存する簡易的なストレージ
 let users = {} // IP アドレスベースの入室者管理 (IP -> ユーザー名)
 let lastUpdated = Date.now() // 最後にメッセージが更新されたタイムスタンプ
 let rooms = {} // 部屋ごとのデータを管理するオブジェクト (roomId -> { messages, users, lastUpdated })
+let currentRoomId = 0
 
 const getRoom = roomId => {
-  /*
-  if (!rooms[roomId]) {
-    rooms[roomId] = {
-      messages: [],
-      users: {},
-      lastUpdated: Date.now()
-    }
-  }
-  */
   return rooms[roomId]
 }
 
@@ -40,14 +32,19 @@ module.exports = async (req, res) => {
 
     req.on('end', () => {
       try {
-        const { id, name, description } = JSON.parse(body)
+        const { name, description } = JSON.parse(body)
 
-        if (!id || !name || !description) {
+        if (!name || !description) {
           res
             .status(400)
             .json({ error: 'All fields (id, name, description) are required.' })
           return
         }
+
+        while (rooms[currentRoomId]) {
+          currentRoomId++
+        }
+        const id = currentRoomId
 
         if (rooms[id]) {
           res.status(400).json({ error: 'Room ID already exists.' })

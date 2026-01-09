@@ -52,15 +52,6 @@
   <body>
     <h1>Create a New Room</h1>
     <form id="createRoomForm">
-      <label for="roomId">Room ID</label>
-      <input
-        type="text"
-        id="roomId"
-        name="roomId"
-        placeholder="Enter room ID"
-        required
-      />
-
       <label for="roomName">Room Name</label>
       <input
         type="text"
@@ -89,13 +80,12 @@
       form.addEventListener('submit', async event => {
         event.preventDefault()
 
-        const roomId = document.getElementById('roomId').value.trim()
         const roomName = document.getElementById('roomName').value.trim()
         const roomDescription = document
           .getElementById('roomDescription')
           .value.trim()
 
-        if (!roomId || !roomName || !roomDescription) {
+        if (!roomName || !roomDescription) {
           alert('All fields are required.')
           return
         }
@@ -110,7 +100,6 @@
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              id: roomId,
               name: roomName,
               description: roomDescription
             })
