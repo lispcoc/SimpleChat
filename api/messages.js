@@ -3,6 +3,7 @@ const db = require('./db')
 
 let lastUpdated = Date.now()
 let rooms = {}
+let roomDataLoaded = false
 let currentRoomId = 0
 
 // データベースからルーム情報をロード
@@ -29,6 +30,7 @@ const loadRoomsFromDB = async () => {
       }
     })
 
+    roomDataLoaded = true
     console.log('Rooms loaded from database:', rooms)
   } catch (error) {
     console.error('Error loading rooms from database:', error)
@@ -36,6 +38,9 @@ const loadRoomsFromDB = async () => {
 }
 
 const getRoom = roomId => {
+  if (!roomDataLoaded) {
+    loadRoomsFromDB()
+  }
   return rooms[roomId]
 }
 
@@ -264,6 +269,3 @@ module.exports = async (req, res) => {
     res.status(405).json({ error: 'Method not allowed' })
   }
 }
-
-// サーバー起動時にルーム情報をロード
-loadRoomsFromDB()
