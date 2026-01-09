@@ -1,5 +1,5 @@
 {
   "functions": {
-    "api/*.js": { "includeFiles": [ "node_modules/**" ] }
+    "api/*.js": { "includeFiles": "node_modules/**" }
   }
 }
