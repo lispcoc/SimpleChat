@@ -108,6 +108,10 @@
         style="overflow-y: auto; border: 1px solid #ddd; padding: 10px"
       ></div>
     </div>
+    <div id="roomInfo" style="text-align: center; margin: 20px">
+      <h2 id="roomName">Room Name</h2>
+      <p id="roomDescription">Room Description</p>
+    </div>
     <div id="chatContainer" style="display: flex; height: 100%">
       <!-- メッセージ欄 -->
       <div
@@ -304,6 +308,13 @@
         if (response.ok) {
           const data = await response.json()
           console.log(data)
+          // ルーム情報をページに表示
+          const roomNameElement = document.getElementById('roomName')
+          const roomDescriptionElement =
+            document.getElementById('roomDescription')
+          roomNameElement.textContent = data.name
+          roomDescriptionElement.textContent = data.description
+
           return data
         } else {
           const errorData = await response.json()
@@ -344,6 +355,24 @@
         setInterval(fetchMessages, interval) // 指定した間隔で fetchMessages を呼び出す
       }
 
+      // 初期化処理
+      async function initializePage() {
+        if (roomId == null) {
+          hideAllUI()
+          alert('ルームIDが不正です。')
+        } else {
+          const roomData = await getRoomInfo()
+          if (roomData == null) {
+            hideAllUI()
+          } else {
+            // 初回メッセージ取得
+            fetchMessages()
+            // 定期的にメッセージを取得
+            pollMessages()
+          }
+        }
+      }
+
       sendButton.addEventListener('click', sendMessage)
       messageInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') {
@@ -354,21 +383,8 @@
       enterButton.addEventListener('click', enterRoom)
       leaveButton.addEventListener('click', leaveRoom)
 
-      if (roomId == null) {
-        hideAllUI()
-        alert('ルームIDが不正です。')
-      } else {
-        const roomData = getRoomInfo()
-        console.log(roomData)
-        if (roomData == null) {
-          hideAllUI()
-        } else {
-          // 初回メッセージ取得
-          fetchMessages()
-          // 定期的にメッセージを取得
-          pollMessages()
-        }
-      }
+      // ページ初期化
+      initializePage()
     </script>
   </body>
 </html>
