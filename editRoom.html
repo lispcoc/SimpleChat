@@ -53,10 +53,10 @@
       required
     />
 
-    <button type="submit">ログイン</button>
+    <button type="submit" id="loginButton" name="loginButton">ログイン</button>
   </form>
 
-  <form id="createRoomForm">
+  <form id="createRoomForm" style="display: none">
     <label for="roomName">部屋の名前 (必須)</label>
     <input
       type="text"
@@ -99,13 +99,15 @@
       rows="4"
     ></textarea>
 
-    <button type="submit">変更を反映</button>
+    <button type="submit" id="editButton" name="editButton">変更を反映</button>
   </form>
 
   <script>
     const API_URL = '/api/messages'
     const loginForm = document.getElementById('loginRoomEdit')
-    const form = document.getElementById('createRoomForm')
+    const loginButton = document.getElementById('loginButton')
+    const editForm = document.getElementById('createRoomForm')
+    const editButton = document.getElementById('editButton')
     const params = new URLSearchParams(window.location.search)
     const roomId = params.get('roomId')
 
@@ -126,6 +128,7 @@
         return
       }
 
+      loginButton.disabled = true
       try {
         const params = new URLSearchParams({
           mode: 'roomInfoForEdit'
@@ -146,6 +149,8 @@
           console.log(data)
           document.getElementById('roomName').value = data.name
           document.getElementById('roomDescription').value = data.description
+          loginForm.style.display = 'none'
+          editForm.style.display = 'block'
         } else {
           const errorData = await response.json()
           alert(`Error: ${errorData.error}`)
@@ -154,9 +159,10 @@
         console.error('Error editting room:', error)
         alert('An error occurred while editting the room.')
       }
+      loginButton.disabled = false
     })
 
-    form.addEventListener('submit', async event => {
+    editForm.addEventListener('submit', async event => {
       event.preventDefault()
 
       const roomName = document.getElementById('roomName').value.trim()
@@ -188,6 +194,7 @@
         return
       }
 
+      editButton.disabled = true
       try {
         const params = new URLSearchParams({
           mode: 'editRoom'
@@ -210,7 +217,7 @@
           const data = await response.json()
           alert('変更を反映しました。')
           console.log(data)
-          form.reset()
+          editForm.reset()
         } else {
           const errorData = await response.json()
           alert(`Error: ${errorData.error}`)
@@ -219,6 +226,7 @@
         console.error('Error creating room:', error)
         alert('An error occurred while creating the room.')
       }
+      editButton.disabled = false
     })
   </script>
 </html>
