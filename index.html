@@ -47,8 +47,6 @@
 
       #users {
         overflow-y: auto;
-        border: 1px solid #ddd;
-        padding: 10px;
       }
 
       #input {
@@ -112,7 +110,7 @@
       <span id="users"></span>
     </div>
 
-    <div id="roomDescriptionSection" style="margin: 20px">
+    <div id="roomDescriptionSection" style="margin: 10px">
       <span style="margin-right: 10px; font-weight: bold">ルーム紹介</span>
       <p id="roomDescription">roomDescription</p>
     </div>
@@ -221,6 +219,8 @@
                   messageElement.textContent = `${username}: ${msg.text} (${formattedTime})`
                 }
                 messagesDiv.appendChild(messageElement)
+                const hr = document.createElement('hr')
+                messagesDiv.appendChild(hr)
               })
 
             messagesDiv.scrollTop = messagesDiv.scrollHeight
