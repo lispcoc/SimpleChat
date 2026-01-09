@@ -11,6 +11,10 @@
         padding: 0;
       }
 
+      #main {
+        margin: 20px;
+      }
+
       #roomDescriptionSection {
         border: 1px solid #ccc;
         border-radius: 5px;
@@ -90,47 +94,47 @@
   </head>
 
   <body>
-    <div id="roomNameSection" style="margin: 20px">
+    <div id="main">
       <h2 id="roomName">roomName</h2>
-    </div>
 
-    <div id="controls">
-      <input type="text" id="usernameInput" placeholder="名前" />
-      <button id="enterButton">入室</button>
-      <button id="leaveButton" style="display: none">退室</button>
-    </div>
-    <div id="inputDiv" style="display: none">
-      <span
-        id="usernameDisplay"
-        style="margin-right: 10px; font-weight: bold"
-      ></span>
-      <input
-        type="text"
-        id="messageInput"
-        placeholder="Type your message..."
-        style="width: 80%"
-      />
-      <button id="sendButton" style="white-space: nowrap">発言</button>
-    </div>
-
-    <!-- 入室者リスト -->
-    <div id="userSection">
-      <span style="font-weight: bold">現在の入室者: </span>
-      <span id="users"></span>
-    </div>
-
-    <div id="roomDescriptionSection">
-      <a><span style="font-weight: bold">ルーム紹介</span> [表示]</a>
-      <p id="roomDescription">roomDescription</p>
-    </div>
-
-    <div id="chatContainer" style="display: flex; height: 100%">
-      <!-- メッセージ欄 -->
-      <div id="messageSection">
-        <div id="messages"></div>
+      <div id="controls">
+        <input type="text" id="usernameInput" placeholder="名前" />
+        <button id="enterButton">入室</button>
+        <button id="leaveButton" style="display: none">退室</button>
       </div>
+      <div id="inputDiv" style="display: none">
+        <span
+          id="usernameDisplay"
+          style="margin-right: 10px; font-weight: bold"
+        ></span>
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="Type your message..."
+          style="width: 80%"
+        />
+        <button id="sendButton" style="white-space: nowrap">発言</button>
+      </div>
+
+      <!-- 入室者リスト -->
+      <div id="userSection">
+        <span style="font-weight: bold">現在の入室者: </span>
+        <span id="users"></span>
+      </div>
+
+      <div id="roomDescriptionSection">
+        <span style="font-weight: bold">ルーム紹介</span> <a>[表示]</a>
+        <p id="roomDescription">roomDescription</p>
+      </div>
+
+      <div id="chatContainer" style="display: flex; height: 100%">
+        <!-- メッセージ欄 -->
+        <div id="messageSection">
+          <div id="messages"></div>
+        </div>
+      </div>
+      <div id="editRoom"></div>
     </div>
-    <div id="editRoom"></div>
 
     <script>
       const API_URL = '/api/messages'
