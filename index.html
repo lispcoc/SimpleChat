@@ -11,8 +11,9 @@
         padding: 0;
       }
 
-      #main {
-        margin: 20px;
+      div.main {
+        max-width: 800px;
+        margin: 0 auto;
       }
 
       a.roomLink {
@@ -48,15 +49,21 @@
 
         if (response.status === 200) {
           console.log(data)
+          var i = 1
           data.forEach(room => {
+            let numString = `${i}`
             const roomLinkDiv = document.createElement('div')
+            const roomNumber = document.createElement('span')
+            roomNumber.textContent = numString.padStart(2, '0')
             const roomLink = document.createElement('a')
             roomLink.href = `/chat.html?roomId=${room.id}`
             roomLink.textContent = room.name
             roomLink.className = 'roomLink'
 
+            roomLinkDiv.appendChild(roomNumber)
             roomLinkDiv.appendChild(roomLink)
             roomListDiv.appendChild(roomLinkDiv)
+            i++
           })
         }
       }
