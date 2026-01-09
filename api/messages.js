@@ -1,10 +1,8 @@
 const bcrypt = require('bcryptjs')
 const db = require('./db')
 
-let messages = [] // メッセージを保存する簡易的なストレージ
-let users = {} // IP アドレスベースの入室者管理 (IP -> ユーザー名)
-let lastUpdated = Date.now() // 最後にメッセージが更新されたタイムスタンプ
-let rooms = {} // 部屋ごとのデータを管理するオブジェクト (roomId -> { messages, users, lastUpdated })
+let lastUpdated = Date.now()
+let rooms = {}
 let currentRoomId = 0
 
 // データベースからルーム情報をロード
