@@ -43,6 +43,19 @@
   </head>
 
   <h1>部屋の編集</h1>
+  <form id="loginRoomEdit">
+    <label for="roomName">パスワード</label>
+    <input
+      type="password"
+      id="roomPasswordCurrent"
+      name="roomPasswordCurrent"
+      placeholder="パスワード"
+      required
+    />
+
+    <button type="submit">ログイン</button>
+  </form>
+
   <form id="createRoomForm">
     <label for="roomName">部屋の名前 (必須)</label>
     <input
@@ -86,14 +99,62 @@
       rows="4"
     ></textarea>
 
-    <button type="submit">Create Room</button>
+    <button type="submit">変更を反映</button>
   </form>
 
   <script>
     const API_URL = '/api/messages'
+    const loginForm = document.getElementById('loginRoomEdit')
     const form = document.getElementById('createRoomForm')
     const params = new URLSearchParams(window.location.search)
     const roomId = params.get('roomId')
+
+    loginForm.addEventListener('submit', async event => {
+      event.preventDefault()
+
+      const roomPassword = document
+        .getElementById('roomPasswordCurrent')
+        .value.trim()
+
+      if (!roomId) {
+        alert('ルームIDが不正です。')
+        return
+      }
+
+      if (!roomPassword) {
+        alert('All fields are required.')
+        return
+      }
+
+      try {
+        const params = new URLSearchParams({
+          mode: 'roomInfoForEdit'
+        })
+        const response = await fetch(`${API_URL}?${params.toString()}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            roomId: roomId,
+            password: roomPassword
+          })
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          console.log(data)
+          document.getElementById('roomName').value = data.name
+          document.getElementById('roomDescription').value = data.description
+        } else {
+          const errorData = await response.json()
+          alert(`Error: ${errorData.error}`)
+        }
+      } catch (error) {
+        console.error('Error editting room:', error)
+        alert('An error occurred while editting the room.')
+      }
+    })
 
     form.addEventListener('submit', async event => {
       event.preventDefault()
