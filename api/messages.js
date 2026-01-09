@@ -7,6 +7,36 @@ let lastUpdated = Date.now() // 最後にメッセージが更新されたタイ
 let rooms = {} // 部屋ごとのデータを管理するオブジェクト (roomId -> { messages, users, lastUpdated })
 let currentRoomId = 0
 
+// データベースからルーム情報をロード
+const loadRoomsFromDB = async () => {
+  try {
+    const query =
+      'SELECT id, name, description, password, special_keys FROM rooms'
+    const result = await db.query(query)
+
+    result.rows.forEach(row => {
+      rooms[row.id] = {
+        messages: [],
+        users: {},
+        lastUpdated: Date.now(),
+        name: row.name,
+        description: row.description,
+        password: row.password,
+        specialKeys: row.special_keys ? JSON.parse(row.special_keys) : {}
+      }
+
+      // 現在の最大ルームIDを更新
+      if (row.id > currentRoomId) {
+        currentRoomId = row.id
+      }
+    })
+
+    console.log('Rooms loaded from database:', rooms)
+  } catch (error) {
+    console.error('Error loading rooms from database:', error)
+  }
+}
+
 const getRoom = roomId => {
   return rooms[roomId]
 }
@@ -236,3 +266,6 @@ module.exports = async (req, res) => {
     res.status(405).json({ error: 'Method not allowed' })
   }
 }
+
+// サーバー起動時にルーム情報をロード
+loadRoomsFromDB()
