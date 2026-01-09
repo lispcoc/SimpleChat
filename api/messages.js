@@ -200,36 +200,43 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST' && mode === 'roomInfoForEdit') {
-    try {
-      const { roomId, password } = JSON.parse(body)
+    let body = ''
+    req.on('data', chunk => {
+      body += chunk.toString()
+    })
 
-      if (!roomId || !password) {
-        res.status(400).json({ error: 'Room ID and password are required.' })
-        return
-      }
+    req.on('end', async () => {
+      try {
+        const { roomId, password } = JSON.parse(body)
 
-      const room = await getRoom(roomId)
-      if (!room) {
-        res.status(404).json({ error: 'Room not found.' })
-        return
-      }
+        if (!roomId || !password) {
+          res.status(400).json({ error: 'Room ID and password are required.' })
+          return
+        }
 
-      // パスワード認証
-      const isPasswordValid = await bcrypt.compare(password, room.password)
-      if (!isPasswordValid) {
-        res.status(403).json({ error: 'Invalid password.' })
-        return
+        const room = await getRoom(roomId)
+        if (!room) {
+          res.status(404).json({ error: 'Room not found.' })
+          return
+        }
+
+        // パスワード認証
+        const isPasswordValid = await bcrypt.compare(password, room.password)
+        if (!isPasswordValid) {
+          res.status(403).json({ error: 'Invalid password.' })
+          return
+        }
+        res.status(200).json({
+          roomId,
+          name: room.name,
+          description: room.description,
+          specialKeys: room.specialKeys
+        })
+      } catch (error) {
+        console.error('Error updating room:', error)
+        res.status(500).json({ error: 'Internal server error.' })
       }
-      res.status(200).json({
-        roomId,
-        name: room.name,
-        description: room.description,
-        specialKeys: room.specialKeys
-      })
-    } catch (error) {
-      console.error('Error updating room:', error)
-      res.status(500).json({ error: 'Internal server error.' })
-    }
+    })
     return
   }
 
