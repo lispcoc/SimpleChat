@@ -66,7 +66,10 @@ module.exports = async (req, res) => {
     if (Object.keys(rooms).length > MAX_ROOMS) {
       res
         .status(400)
-        .json({ error: '部屋数が上限に到達しています。新規受付けの再開をお待ちください。' })
+        .json({
+          error:
+            '部屋数が上限に到達しています。新規受付けの再開をお待ちください。'
+        })
       return
     }
 
@@ -294,15 +297,18 @@ module.exports = async (req, res) => {
         if (action === 'enter') {
           // 既に入室している場合は無視
           if (room.users[ip]) {
-            res
-              .status(200)
-              .json({ success: true, message: 'Already in the room' })
+            res.status(200).json({ success: true, message: '既に入室済みです' })
             return
           }
 
           // 入室処理
           if (!username || username.trim() === '') {
-            res.status(400).json({ error: 'Username is required' })
+            res.status(400).json({ error: '名前を入力してください' })
+            return
+          }
+
+          if (username.length > 20) {
+            res.status(400).json({ error: '名前が長すぎます' })
             return
           }
 
@@ -342,7 +348,12 @@ module.exports = async (req, res) => {
 
           // メッセージ送信処理
           if (!text) {
-            res.status(400).json({ error: 'Text is required' })
+            res.status(400).json({ error: 'メッセージを入力してください' })
+            return
+          }
+
+          if (text.length > 1000) {
+            res.status(400).json({ error: 'メッセージが長すぎます' })
             return
           }
 
