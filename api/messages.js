@@ -31,6 +31,47 @@ module.exports = async (req, res) => {
   const roomId = req.query.roomId // URL パラメータから roomId を取得
   const mode = req.query.mode
 
+  if (req.method === 'POST' && mode === 'createRoom') {
+    // ルーム作成エンドポイント
+    let body = ''
+    req.on('data', chunk => {
+      body += chunk.toString()
+    })
+
+    req.on('end', () => {
+      try {
+        const { id, name, description } = JSON.parse(body)
+
+        if (!id || !name || !description) {
+          res
+            .status(400)
+            .json({ error: 'All fields (id, name, description) are required.' })
+          return
+        }
+
+        if (rooms[id]) {
+          res.status(400).json({ error: 'Room ID already exists.' })
+          return
+        }
+
+        rooms[id] = {
+          messages: [],
+          users: {},
+          lastUpdated: Date.now(),
+          name,
+          description
+        }
+
+        res
+          .status(201)
+          .json({ success: true, message: 'Room created successfully.' })
+      } catch (error) {
+        res.status(400).json({ error: 'Invalid JSON.' })
+      }
+    })
+    return
+  }
+
   if (req.method === 'GET' && mode === 'roomInfo') {
     // ルーム情報を返すエンドポイント
     if (!roomId) {

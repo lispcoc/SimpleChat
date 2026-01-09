@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Room</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: #f9f9f9;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Create a New Room</h1>
+    <form id="createRoomForm">
+      <label for="roomId">Room ID</label>
+      <input
+        type="text"
+        id="roomId"
+        name="roomId"
+        placeholder="Enter room ID"
+        required
+      />
+
+      <label for="roomName">Room Name</label>
+      <input
+        type="text"
+        id="roomName"
+        name="roomName"
+        placeholder="Enter room name"
+        required
+      />
+
+      <label for="roomDescription">Room Description</label>
+      <textarea
+        id="roomDescription"
+        name="roomDescription"
+        placeholder="Enter room description"
+        rows="4"
+        required
+      ></textarea>
+
+      <button type="submit">Create Room</button>
+    </form>
+
+    <script>
+      const form = document.getElementById('createRoomForm')
+
+      form.addEventListener('submit', async event => {
+        event.preventDefault()
+
+        const roomId = document.getElementById('roomId').value.trim()
+        const roomName = document.getElementById('roomName').value.trim()
+        const roomDescription = document
+          .getElementById('roomDescription')
+          .value.trim()
+
+        if (!roomId || !roomName || !roomDescription) {
+          alert('All fields are required.')
+          return
+        }
+
+        try {
+          const response = await fetch('/api/rooms', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              id: roomId,
+              name: roomName,
+              description: roomDescription
+            })
+          })
+
+          if (response.ok) {
+            alert('Room created successfully!')
+            form.reset()
+          } else {
+            const errorData = await response.json()
+            alert(`Error: ${errorData.error}`)
+          }
+        } catch (error) {
+          console.error('Error creating room:', error)
+          alert('An error occurred while creating the room.')
+        }
+      })
+    </script>
+  </body>
+</html>
