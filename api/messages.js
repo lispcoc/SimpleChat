@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt')
+
 let messages = [] // メッセージを保存する簡易的なストレージ
 let users = {} // IP アドレスベースの入室者管理 (IP -> ユーザー名)
 let lastUpdated = Date.now() // 最後にメッセージが更新されたタイムスタンプ
@@ -30,11 +32,11 @@ module.exports = async (req, res) => {
       body += chunk.toString()
     })
 
-    req.on('end', () => {
+    req.on('end', async () => {
       try {
-        const { name, description, specialKeys } = JSON.parse(body)
+        const { name, description, password, specialKeys } = JSON.parse(body)
 
-        if (!name || !description) {
+        if (!name || !description || !password) {
           res
             .status(400)
             .json({ error: 'All fields (id, name, description) are required.' })
@@ -51,12 +53,16 @@ module.exports = async (req, res) => {
           return
         }
 
+        // パスワードをハッシュ化
+        const hashedPassword = await bcrypt.hash(password, 10)
+
         rooms[id] = {
           messages: [],
           users: {},
           lastUpdated: Date.now(),
           name,
           description,
+          password: hashedPassword,
           specialKeys
         }
 

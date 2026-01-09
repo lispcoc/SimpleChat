@@ -70,6 +70,15 @@
         required
       ></textarea>
 
+      <label for="roomPassword">Room Password</label>
+      <input
+        type="password"
+        id="roomPassword"
+        name="roomPassword"
+        placeholder="Enter room password"
+        required
+      />
+
       <label for="roomSpecialKey_1">特殊キーの設定(1)</label>
       <input
         type="text"
@@ -100,6 +109,9 @@
         const roomDescription = document
           .getElementById('roomDescription')
           .value.trim()
+        const roomPassword = document
+          .getElementById('roomPassword')
+          .value.trim()
         const roomSpecialKey_1 = document
           .getElementById('roomSpecialKey_1')
           .value.trim()
@@ -114,7 +126,7 @@
           roomSpecialKeys[roomSpecialKey_1] = roomSpecialText_1
         }
 
-        if (!roomName || !roomDescription) {
+        if (!roomName || !roomDescription || !roomPassword) {
           alert('All fields are required.')
           return
         }
@@ -131,6 +143,7 @@
             body: JSON.stringify({
               name: roomName,
               description: roomDescription,
+              password: roomPassword,
               specialKeys: roomSpecialKeys
             })
           })
