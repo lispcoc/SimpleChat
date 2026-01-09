@@ -106,7 +106,9 @@
           })
 
           if (response.ok) {
+            const data = await response.json()
             alert('Room created successfully!')
+            console.log(data)
             form.reset()
           } else {
             const errorData = await response.json()
