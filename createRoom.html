@@ -83,6 +83,7 @@
     </form>
 
     <script>
+      const API_URL = '/api/messages'
       const form = document.getElementById('createRoomForm')
 
       form.addEventListener('submit', async event => {
@@ -100,7 +101,10 @@
         }
 
         try {
-          const response = await fetch('/api/rooms', {
+          const params = new URLSearchParams({
+            mode: 'createRoom'
+          })
+          const response = await fetch(`${API_URL}?${params.toString()}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
