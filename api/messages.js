@@ -32,13 +32,17 @@ module.exports = async (req, res) => {
 
     req.on('end', () => {
       try {
-        const { name, description } = JSON.parse(body)
+        const { name, description, propaties } = JSON.parse(body)
 
         if (!name || !description) {
           res
             .status(400)
             .json({ error: 'All fields (id, name, description) are required.' })
           return
+        }
+
+        if (!propaties) {
+          propaties = {}
         }
 
         while (rooms[currentRoomId]) {
@@ -56,12 +60,17 @@ module.exports = async (req, res) => {
           users: {},
           lastUpdated: Date.now(),
           name,
-          description
+          description,
+          propaties
         }
 
         res
           .status(201)
-          .json({ success: true, message: 'Room created successfully.' })
+          .json({
+            success: true,
+            message: 'Room created successfully.',
+            id: id
+          })
       } catch (error) {
         res.status(400).json({ error: 'Invalid JSON.' })
       }
