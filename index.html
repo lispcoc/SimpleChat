@@ -304,9 +304,11 @@
         if (response.ok) {
           const data = await response.json()
           console.log(data)
+          return data
         } else {
           const errorData = await response.json()
           alert(errorData.error)
+          return null
         }
       }
 
@@ -356,11 +358,15 @@
         hideAllUI()
         alert('ルームIDが不正です。')
       } else {
-        getRoomInfo()
-        // 初回メッセージ取得
-        fetchMessages()
-        // 定期的にメッセージを取得
-        pollMessages()
+        const roomData = getRoomInfo()
+        if (roomData == null) {
+          hideAllUI()
+        } else {
+          // 初回メッセージ取得
+          fetchMessages()
+          // 定期的にメッセージを取得
+          pollMessages()
+        }
       }
     </script>
   </body>
