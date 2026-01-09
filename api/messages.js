@@ -62,6 +62,14 @@ module.exports = async (req, res) => {
 
   if (req.method === 'POST' && mode === 'createRoom') {
     const ROOM_CREATE_INTERVAL = 7 * 24 * 60 * 60 * 1000
+    const MAX_ROOMS = 1000
+    if (Object.keys(rooms).length > MAX_ROOMS) {
+      res
+        .status(400)
+        .json({ error: '部屋数が上限に到達しています。新規受付けの再開をお待ちください。' })
+      return
+    }
+
     if (Date.now() - roomCreateCount[ip] < ROOM_CREATE_INTERVAL) {
       res
         .status(400)
