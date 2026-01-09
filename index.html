@@ -15,6 +15,7 @@
         border: 1px solid #ccc;
         border-radius: 5px;
         background: #f9f9f9;
+        padding: 10px;
       }
 
       #chat {
@@ -37,6 +38,9 @@
       }
 
       #userSection {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: #f9f9f9;
         flex: 1;
         padding: 10px;
       }
@@ -79,13 +83,17 @@
       }
 
       span.timestamp {
-        size: -1;
-        color: 'gray';
+        font-size: 0.8em;
+        color: gray;
       }
     </style>
   </head>
 
   <body>
+    <div id="roomNameSection" style="margin: 20px">
+      <h2 id="roomName">roomName</h2>
+    </div>
+
     <div id="controls">
       <input type="text" id="usernameInput" placeholder="名前" />
       <button id="enterButton">入室</button>
@@ -103,10 +111,6 @@
         style="width: 80%"
       />
       <button id="sendButton" style="white-space: nowrap">発言</button>
-    </div>
-
-    <div id="roomNameSection" style="margin: 20px">
-      <h2 id="roomName">roomName</h2>
     </div>
 
     <!-- 入室者リスト -->
@@ -216,7 +220,7 @@
                   const formattedTime = new Date(msg.timestamp).toLocaleString()
                   const timestampElement = document.createElement('span')
                   timestampElement.className = 'timestamp'
-                  timestampElement.textContent = `(${formattedTime})`
+                  timestampElement.textContent = ` (${formattedTime})`
                   messageElement.appendChild(timestampElement)
                 }
                 const hr = document.createElement('hr')
@@ -391,6 +395,17 @@
 
       enterButton.addEventListener('click', enterRoom)
       leaveButton.addEventListener('click', leaveRoom)
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+          const activeElement = document.activeElement
+          if (activeElement === messageInput) {
+            sendButton.click()
+          } else if (activeElement === usernameInput) {
+            enterButton.click()
+          }
+        }
+      })
 
       // ページ初期化
       initializePage()
