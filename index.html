@@ -14,12 +14,17 @@
       #main {
         margin: 20px;
       }
+
+      a.roomLink {
+        text-decoration: none;
+        color: blue;
+      }
     </style>
   </head>
 
   <body>
     <div id="main">
-      <h2>部屋の一覧</h2>
+      <h3>部屋の一覧</h3>
 
       <hr />
       <div id="roomList"></div>
@@ -44,13 +49,14 @@
         if (response.status === 200) {
           console.log(data)
           data.forEach(room => {
+            const roomLinkDiv = document.createElement('div')
             const roomLink = document.createElement('a')
             roomLink.href = `/chat.html?roomId=${room.id}`
             roomLink.textContent = room.name
-            roomLink.style.textDecoration = 'none'
-            roomLink.style.color = 'blue'
+            roomLink.className = 'roomLink'
 
-            roomListDiv.appendChild(roomLink)
+            roomLinkDiv.appendChild(roomLink)
+            roomListDiv.appendChild(roomLinkDiv)
           })
         }
       }
