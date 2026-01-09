@@ -294,6 +294,22 @@
         }
       }
 
+      // ルーム情報の取得
+      async function getRoomInfo() {
+        const params = new URLSearchParams({
+          roomId: roomId,
+          mode: 'roomInfo'
+        })
+        const response = await fetch(`${API_URL}?${params.toString()}`)
+        if (response.ok) {
+          const data = await response.json()
+          console.log(data)
+        } else {
+          const errorData = await response.json()
+          alert(errorData.error)
+        }
+      }
+
       // UI の更新
       function updateUI() {
         const usernameDisplay = document.getElementById('usernameDisplay')
