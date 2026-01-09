@@ -1,19 +1,39 @@
 let messages = [] // メッセージを保存する簡易的なストレージ
 let users = {} // IP アドレスベースの入室者管理 (IP -> ユーザー名)
 let lastUpdated = Date.now() // 最後にメッセージが更新されたタイムスタンプ
+let rooms = {} // 部屋ごとのデータを管理するオブジェクト (roomId -> { messages, users, lastUpdated })
 
-const addMessage = msg => {
-  messages.push(msg)
-  lastUpdated = Date.now() // 更新タイムスタンプを更新
+const getRoom = roomId => {
+  if (!rooms[roomId]) {
+    rooms[roomId] = {
+      messages: [],
+      users: {},
+      lastUpdated: Date.now()
+    }
+  }
+  return rooms[roomId]
+}
 
-  // メッセージが100件を超えた場合、古いメッセージを削除
-  if (messages.length > 100) {
-    messages.shift() // 配列の先頭（最も古いメッセージ）を削除
+const addMessage = (roomId, msg) => {
+  const room = getRoom(roomId)
+  room.messages.push(msg)
+  room.lastUpdated = Date.now()
+
+  if (room.messages.length > 100) {
+    room.messages.shift()
   }
 }
 
 module.exports = async (req, res) => {
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress // IP アドレス取得
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+  const roomId = req.query.roomId // URL パラメータから roomId を取得
+
+  if (!roomId) {
+    res.status(400).json({ error: 'roomId is required' })
+    return
+  }
+
+  const room = getRoom(roomId)
 
   if (req.method === 'POST') {
     let body = ''
@@ -28,7 +48,7 @@ module.exports = async (req, res) => {
 
         if (action === 'enter') {
           // 既に入室している場合は無視
-          if (users[ip]) {
+          if (room.users[ip]) {
             res
               .status(200)
               .json({ success: true, message: 'Already in the room' })
@@ -41,8 +61,8 @@ module.exports = async (req, res) => {
             return
           }
 
-          users[ip] = username.trim() // IP アドレスとユーザー名を関連付け
-          addMessage({
+          room.users[ip] = username.trim()
+          addMessage(roomId, {
             text: `User ${username} has entered the room.`,
             timestamp: Date.now(),
             system: true
@@ -52,9 +72,9 @@ module.exports = async (req, res) => {
           res.status(200).json({ success: true, message: 'Entered the room' })
         } else if (action === 'leave') {
           // 退室処理
-          const username = users[ip]
-          delete users[ip]
-          addMessage({
+          const username = room.users[ip]
+          delete room.users[ip]
+          addMessage(roomId, {
             text: `User ${username || ip} has left the room.`,
             timestamp: Date.now(),
             system: true
@@ -64,7 +84,7 @@ module.exports = async (req, res) => {
           res.status(200).json({ success: true, message: 'Left the room' })
         } else if (action === 'message') {
           // 入室しているか確認
-          if (!users[ip]) {
+          if (!room.users[ip]) {
             res.status(403).json({
               error: 'You must enter the room before sending messages.'
             })
@@ -77,8 +97,12 @@ module.exports = async (req, res) => {
             return
           }
 
-          const message = { text, timestamp: Date.now(), username: users[ip] }
-          addMessage(message)
+          const message = {
+            text,
+            timestamp: Date.now(),
+            username: room.users[ip]
+          }
+          addMessage(roomId, message)
           lastUpdated = Date.now() // 更新タイムスタンプを更新
 
           res.status(201).json({ success: true })
@@ -92,17 +116,17 @@ module.exports = async (req, res) => {
   } else if (req.method === 'GET') {
     const clientLastUpdated = parseInt(req.query.lastUpdated, 10) || 0
     const clientIp =
-      req.headers['x-forwarded-for'] || req.connection.remoteAddress // クライアントの IP アドレスを取得
+      req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
     if (clientLastUpdated < lastUpdated) {
       res.status(200).json({
-        messages: messages.slice(-20), // 最新20件のメッセージを返す
-        users: Object.entries(users).map(([ip, username]) => ({
+        messages: room.messages.slice(-20),
+        users: Object.entries(room.users).map(([ip, username]) => ({
           ip,
           username
-        })), // 入室者リスト
-        clientIp, // クライアントの IP アドレスを追加
-        lastUpdated // サーバーの最新更新タイムスタンプを返す
+        })),
+        clientIp,
+        lastUpdated: room.lastUpdated
       })
     } else {
       res.status(204).end() // 更新がない場合は 204 No Content を返す
