@@ -277,9 +277,13 @@ module.exports = async (req, res) => {
             return
           }
 
-          room.users[ip] = username.trim()
+          room.users[ip] = {
+            username: username.trim(),
+            lastActivity: Date.now() // 最終アクティビティを記録
+          }
+
           addMessage(roomId, {
-            text: `User ${username} has entered the room.`,
+            text: `${username} さんが入室しました。`,
             timestamp: Date.now(),
             system: true
           })
@@ -288,10 +292,10 @@ module.exports = async (req, res) => {
           res.status(200).json({ success: true, message: 'Entered the room' })
         } else if (action === 'leave') {
           // 退室処理
-          const username = room.users[ip]
+          const username = room.users[ip].username
           delete room.users[ip]
           addMessage(roomId, {
-            text: `User ${username || ip} has left the room.`,
+            text: `${username || ip} さんが退室しました。`,
             timestamp: Date.now(),
             system: true
           })
@@ -316,7 +320,7 @@ module.exports = async (req, res) => {
           const message = {
             text,
             timestamp: Date.now(),
-            username: room.users[ip]
+            username: room.users[ip].username
           }
           addMessage(roomId, message)
 
@@ -332,6 +336,7 @@ module.exports = async (req, res) => {
             }
             addMessage(roomId, message)
           }
+          room.users[ip].lastActivity = Date.now()
           lastUpdated = Date.now() // 更新タイムスタンプを更新
 
           res.status(201).json({ success: true })
@@ -364,3 +369,25 @@ module.exports = async (req, res) => {
     res.status(405).json({ error: 'Method not allowed' })
   }
 }
+
+// 非アクティブなユーザーをチェックして退室
+setInterval(() => {
+  const now = Date.now()
+  const INACTIVITY_LIMIT = 20 * 60 * 1000 // 20分（ミリ秒）
+
+  Object.keys(rooms).forEach(roomId => {
+    const room = rooms[roomId]
+    Object.entries(room.users).forEach(([ip, user]) => {
+      if (now - user.lastActivity > INACTIVITY_LIMIT) {
+        // ユーザーを退室させる
+        addMessage(roomId, {
+          text: `${user.username || ip} さんが非アクティブのため退室しました。`,
+          timestamp: now,
+          system: true
+        })
+        delete room.users[ip] // ユーザーを削除
+        lastUpdated = now // 更新タイムスタンプを更新
+      }
+    })
+  })
+}, 60 * 1000) // 1分ごとにチェック

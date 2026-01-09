@@ -120,8 +120,7 @@
     </div>
 
     <div id="roomDescriptionSection">
-      <span style="font-weight: bold">ルーム紹介</span>
-      <a>[表示]</a>
+      <a><span style="font-weight: bold">ルーム紹介</span> [表示]</a>
       <p id="roomDescription">roomDescription</p>
     </div>
 
@@ -172,7 +171,7 @@
           const usersDiv = document.getElementById('users')
           usersDiv.innerHTML = '' // リストをクリア
           data.users.forEach(user => {
-            const userElement = document.createElement('div')
+            const userElement = document.createElement('span')
             userElement.textContent = user.username || 'Unknown' // ユーザー名を表示
             usersDiv.appendChild(userElement)
           })
@@ -244,7 +243,7 @@
       async function enterRoom() {
         const username = usernameInput.value.trim()
         if (!username) {
-          alert('Please enter a username.')
+          alert('名前を入力してください。')
           return
         }
 
@@ -394,10 +393,10 @@
       function toggleRoomDescription(show = true) {
         if (show) {
           roomDescription.style.display = 'block'
-          toggleButton.textContent = '[非表示]'
+          roomDescriptionToggleButton.textContent = '[非表示]'
         } else {
           roomDescription.style.display = 'none'
-          toggleButton.textContent = '[表示]'
+          roomDescriptionToggleButton.textContent = '[表示]'
         }
       }
 
