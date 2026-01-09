@@ -37,15 +37,15 @@ const loadRoomsFromDB = async () => {
   }
 }
 
-const getRoom = roomId => {
+const getRoom = async roomId => {
   if (!roomDataLoaded) {
-    loadRoomsFromDB()
+    await loadRoomsFromDB()
   }
   return rooms[roomId]
 }
 
-const addMessage = (roomId, msg) => {
-  const room = getRoom(roomId)
+const addMessage = async (roomId, msg) => {
+  const room = await getRoom(roomId)
   room.messages.push(msg)
   room.lastUpdated = Date.now()
 
@@ -77,12 +77,12 @@ module.exports = async (req, res) => {
           return
         }
 
-        while (rooms[currentRoomId]) {
+        while (await getRoom(currentRoomId)) {
           currentRoomId++
         }
         const id = currentRoomId
 
-        if (rooms[id]) {
+        if (await getRoom(id)) {
           res.status(400).json({ error: 'Room ID already exists.' })
           return
         }
@@ -132,7 +132,7 @@ module.exports = async (req, res) => {
       return
     }
 
-    const room = getRoom(roomId)
+    const room = await getRoom(roomId)
     if (room == null) {
       res.status(400).json({ error: 'Room is not exist' })
       return
@@ -150,7 +150,7 @@ module.exports = async (req, res) => {
     return
   }
 
-  const room = getRoom(roomId)
+  const room = await getRoom(roomId)
   if (room == null) {
     res.status(400).json({ error: 'Room is not exist' })
     return
