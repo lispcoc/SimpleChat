@@ -5,6 +5,7 @@ let lastUpdated = Date.now()
 let rooms = {}
 let roomDataLoaded = false
 let currentRoomId = 0
+let roomCreateCount = {}
 
 // データベースからルーム情報をロード
 const loadRoomsFromDB = async () => {
@@ -60,6 +61,14 @@ module.exports = async (req, res) => {
   const mode = req.query.mode
 
   if (req.method === 'POST' && mode === 'createRoom') {
+    const ROOM_CREATE_INTERVAL = 7 * 24 * 60 * 60 * 1000
+    if (Date.now() - roomCreateCount[ip] < ROOM_CREATE_INTERVAL) {
+      res
+        .status(400)
+        .json({ error: '部屋の再作成は充分な期間を空けてください。' })
+      return
+    }
+
     // ルーム作成エンドポイント
     let body = ''
     req.on('data', chunk => {
@@ -112,6 +121,7 @@ module.exports = async (req, res) => {
           password: hashedPassword,
           specialKeys
         }
+        roomCreateCount[ip] = Date.now()
 
         res.status(201).json({
           success: true,
