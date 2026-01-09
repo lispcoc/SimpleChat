@@ -32,17 +32,13 @@ module.exports = async (req, res) => {
 
     req.on('end', () => {
       try {
-        const { name, description, propaties } = JSON.parse(body)
+        const { name, description, specialKeys } = JSON.parse(body)
 
         if (!name || !description) {
           res
             .status(400)
             .json({ error: 'All fields (id, name, description) are required.' })
           return
-        }
-
-        if (!propaties) {
-          propaties = {}
         }
 
         while (rooms[currentRoomId]) {
@@ -61,16 +57,14 @@ module.exports = async (req, res) => {
           lastUpdated: Date.now(),
           name,
           description,
-          propaties
+          specialKeys
         }
 
-        res
-          .status(201)
-          .json({
-            success: true,
-            message: 'Room created successfully.',
-            id: id
-          })
+        res.status(201).json({
+          success: true,
+          message: 'Room created successfully.',
+          id: id
+        })
       } catch (error) {
         res.status(400).json({ error: 'Invalid JSON.' })
       }
@@ -177,6 +171,19 @@ module.exports = async (req, res) => {
             username: room.users[ip]
           }
           addMessage(roomId, message)
+
+          if (room.specialKeys[text] && room.specialKeys[text].length) {
+            const specialText =
+              room.specialKeys[text][
+                Math.floor(Math.random() * room.specialKeys[text].length)
+              ]
+            const message = {
+              text: `${text}: ${specialText}`,
+              timestamp: Date.now(),
+              system: true
+            }
+            addMessage(roomId, message)
+          }
           lastUpdated = Date.now() // 更新タイムスタンプを更新
 
           res.status(201).json({ success: true })
