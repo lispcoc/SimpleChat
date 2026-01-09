@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const db = require('./db')
 
 let messages = [] // メッセージを保存する簡易的なストレージ
 let users = {} // IP アドレスベースの入室者管理 (IP -> ユーザー名)
@@ -56,6 +57,19 @@ module.exports = async (req, res) => {
         // パスワードをハッシュ化
         const hashedPassword = await bcrypt.hash(password, 10)
 
+        // データベースに保存
+        const query = `
+          INSERT INTO rooms (name, description, password, special_keys, created_at)
+          VALUES ($1, $2, $3, $4, NOW())
+          RETURNING id;
+        `
+        const values = [
+          name,
+          description,
+          hashedPassword,
+          JSON.stringify(specialKeys)
+        ]
+        const result = await db.query(query, values)
         rooms[id] = {
           messages: [],
           users: {},

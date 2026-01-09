@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@vercel/node": "^5.5.16",
-    "bcryptjs": "^3.0.3"
+    "bcryptjs": "^3.0.3",
+    "pg": "^8.16.3"
   }
 }
