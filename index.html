@@ -11,6 +11,10 @@
         padding: 0;
       }
 
+      #roomDescriptionSection {
+        border: 1px solid #ccc;
+      }
+
       #chat {
         max-width: 600px;
         margin: 20px auto;
@@ -50,6 +54,10 @@
       #input {
         display: flex;
         margin-top: 10px;
+      }
+
+      #inputDiv {
+        max-width: 600px;
       }
 
       #inputDiv input {
@@ -94,18 +102,19 @@
       <button id="sendButton">発言</button>
     </div>
 
-    <div id="roomInfo" style="text-align: left; margin: 20px">
-      <h2 id="roomName"></h2>
-      <p id="roomDescription"></p>
+    <div id="roomNameSection" style="margin: 20px">
+      <h2 id="roomName">roomName</h2>
     </div>
 
     <!-- 入室者リスト -->
     <div id="userSection" style="flex: 1; padding: 10px">
       <span style="margin-right: 10px; font-weight: bold">現在の入室者: </span>
-      <div
-        id="users"
-        style="overflow-y: auto; border: 1px solid #ddd; padding: 10px"
-      ></div>
+      <span id="users"></span>
+    </div>
+
+    <div id="roomDescriptionSection" style="margin: 20px">
+      <span style="margin-right: 10px; font-weight: bold">ルーム紹介</span>
+      <p id="roomDescription">roomDescription</p>
     </div>
 
     <div id="chatContainer" style="display: flex; height: 100%">
