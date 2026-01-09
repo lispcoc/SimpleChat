@@ -11,7 +11,7 @@
         padding: 0;
       }
 
-      div.main {
+      #main {
         max-width: 800px;
         margin: 0 auto;
       }
@@ -19,6 +19,10 @@
       a.roomLink {
         text-decoration: none;
         color: blue;
+      }
+
+      div.roomLine {
+        margin-top: 4px;
       }
     </style>
   </head>
@@ -52,17 +56,18 @@
           var i = 1
           data.forEach(room => {
             let numString = `${i}`
-            const roomLinkDiv = document.createElement('div')
+            const roomLineDiv = document.createElement('div')
+            roomLineDiv.className = 'roomLine'
             const roomNumber = document.createElement('span')
-            roomNumber.textContent = numString.padStart(2, '0')
+            roomNumber.textContent = `${numString.padStart(2, '0')}. `
             const roomLink = document.createElement('a')
             roomLink.href = `/chat.html?roomId=${room.id}`
             roomLink.textContent = room.name
             roomLink.className = 'roomLink'
 
-            roomLinkDiv.appendChild(roomNumber)
-            roomLinkDiv.appendChild(roomLink)
-            roomListDiv.appendChild(roomLinkDiv)
+            roomLineDiv.appendChild(roomNumber)
+            roomLineDiv.appendChild(roomLink)
+            roomListDiv.appendChild(roomLineDiv)
             i++
           })
         }
