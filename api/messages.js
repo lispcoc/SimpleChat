@@ -4,6 +4,7 @@ let lastUpdated = Date.now() // 最後にメッセージが更新されたタイ
 let rooms = {} // 部屋ごとのデータを管理するオブジェクト (roomId -> { messages, users, lastUpdated })
 
 const getRoom = roomId => {
+  /*
   if (!rooms[roomId]) {
     rooms[roomId] = {
       messages: [],
@@ -11,6 +12,7 @@ const getRoom = roomId => {
       lastUpdated: Date.now()
     }
   }
+  */
   return rooms[roomId]
 }
 
