@@ -189,6 +189,17 @@ module.exports = async (req, res) => {
     return
   }
 
+  if (req.method === 'GET' && mode === 'roomList') {
+    if (!roomDataLoaded) {
+      await loadRoomsFromDB()
+    }
+
+    const roomList = Object.entries(rooms).map(([id, roomData]) => {
+      return { id: id, name: roomData.name }
+    })
+    res.status(200).json(roomList)
+  }
+
   if (req.method === 'GET' && mode === 'roomInfo') {
     // ルーム情報を返すエンドポイント
     if (!roomId) {
