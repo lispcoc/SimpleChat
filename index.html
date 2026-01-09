@@ -33,7 +33,6 @@
 
       #messageSection {
         flex: 3;
-        border-right: 1px solid #ccc;
         padding: 10px;
       }
 
@@ -43,10 +42,7 @@
       }
 
       #messages {
-        height: 300px;
         overflow-y: auto;
-        border: 1px solid #ddd;
-        padding: 10px;
       }
 
       #users {
@@ -126,19 +122,8 @@
 
     <div id="chatContainer" style="display: flex; height: 100%">
       <!-- メッセージ欄 -->
-      <div
-        id="messageSection"
-        style="flex: 3; border-right: 1px solid #ccc; padding: 10px"
-      >
-        <div
-          id="messages"
-          style="
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-          "
-        ></div>
+      <div id="messageSection">
+        <div id="messages"></div>
       </div>
     </div>
     <div id="editRoom"></div>
@@ -224,10 +209,16 @@
                 } else {
                   // 通常メッセージ
                   const username = msg.username || 'Unknown'
-                  const formattedTime = new Date(msg.timestamp).toLocaleString()
                   messageElement.textContent = `${username}: ${msg.text} <span class='timestamp'>(${formattedTime})</span>`
                 }
                 messagesDiv.appendChild(messageElement)
+                if (msg.timestamp) {
+                  const formattedTime = new Date(msg.timestamp).toLocaleString()
+                  const timestampElement = document.createElement('span')
+                  timestampElement.className = 'timestamp'
+                  timestampElement.textContent = `(${formattedTime})`
+                  messagesDiv.appendChild(timestampElement)
+                }
                 const hr = document.createElement('hr')
                 messagesDiv.appendChild(hr)
               })
