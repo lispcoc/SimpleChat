@@ -121,6 +121,7 @@
 
     <div id="roomDescriptionSection">
       <span style="font-weight: bold">ルーム紹介</span>
+      <a>[表示]</a>
       <p id="roomDescription">roomDescription</p>
     </div>
 
@@ -143,6 +144,10 @@
       const leaveButton = document.getElementById('leaveButton')
       const usersDiv = document.getElementById('users')
       const editRoomDiv = document.getElementById('editRoom')
+      const roomDescription = document.getElementById('roomDescription')
+      const roomDescriptionToggleButton = document.querySelector(
+        '#roomDescriptionSection a'
+      )
 
       let isInRoom = false // 入室状態を管理するフラグ
       let currentUsername = '' // 現在のユーザー名を管理
@@ -152,8 +157,6 @@
 
       // パラメータ "roomId" の値を取得
       const roomId = params.get('roomId')
-
-      console.log(roomId) // 例: "value1"
 
       // 入室者一覧を取得して表示
       async function fetchUsers() {
@@ -258,6 +261,7 @@
           currentUsername = username // 現在のユーザー名を保存
           isInRoom = true // 入室状態を更新
           updateUI() // UI を更新
+          toggleRoomDescription(false)
           fetchMessages()
         } else {
           const errorData = await response.json()
@@ -279,6 +283,7 @@
         if (response.ok) {
           isInRoom = false // 入室状態を更新
           updateUI() // UI を更新
+          toggleRoomDescription(true)
           fetchMessages()
         } else {
           const errorData = await response.json()
@@ -386,6 +391,16 @@
         }
       }
 
+      function toggleRoomDescription(show = true) {
+        if (show) {
+          roomDescription.style.display = 'block'
+          toggleButton.textContent = '[非表示]'
+        } else {
+          roomDescription.style.display = 'none'
+          toggleButton.textContent = '[表示]'
+        }
+      }
+
       sendButton.addEventListener('click', sendMessage)
       messageInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') {
@@ -404,6 +419,14 @@
           } else if (activeElement === usernameInput) {
             enterButton.click()
           }
+        }
+      })
+
+      roomDescriptionToggleButton.addEventListener('click', () => {
+        if (roomDescription.style.display === 'none') {
+          toggleRoomDescription(true)
+        } else {
+          toggleRoomDescription(false)
         }
       })
 
