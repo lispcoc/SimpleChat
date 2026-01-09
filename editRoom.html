@@ -110,6 +110,8 @@
     const editButton = document.getElementById('editButton')
     const params = new URLSearchParams(window.location.search)
     const roomId = params.get('roomId')
+    const roomSpecialKeyList = [document.getElementById('roomSpecialKey_1')]
+    const roomSpecialTextList = [document.getElementById('roomSpecialText_1')]
 
     loginForm.addEventListener('submit', async event => {
       event.preventDefault()
@@ -149,6 +151,15 @@
           console.log(data)
           document.getElementById('roomName').value = data.name
           document.getElementById('roomDescription').value = data.description
+          document.getElementById('roomPassword').value = roomPassword
+
+          var i = 0
+          for (const key of data.specialKeys) {
+            roomSpecialKeyList[i] = key
+            roomSpecialTextList[i] = data.specialKeys[key]
+            i++
+          }
+
           loginForm.style.display = 'none'
           editForm.style.display = 'block'
         } else {
