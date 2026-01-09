@@ -45,10 +45,10 @@
           console.log(data)
           data.forEach(room => {
             const roomLink = document.createElement('a')
-            backLink.href = `/chat.html?roomId=${room.id}`
-            backLink.textContent = room.name
-            backLink.style.textDecoration = 'none'
-            backLink.style.color = 'blue'
+            roomLink.href = `/chat.html?roomId=${room.id}`
+            roomLink.textContent = room.name
+            roomLink.style.textDecoration = 'none'
+            roomLink.style.color = 'blue'
 
             roomListDiv.appendChild(roomLink)
           })
