@@ -94,6 +94,11 @@
       <button id="sendButton">発言</button>
     </div>
 
+    <div id="roomInfo" style="text-align: left; margin: 20px">
+      <h2 id="roomName"></h2>
+      <p id="roomDescription"></p>
+    </div>
+
     <!-- 入室者リスト -->
     <div id="userSection" style="flex: 1; padding: 10px">
       <span style="margin-right: 10px; font-weight: bold">現在の入室者: </span>
@@ -102,10 +107,7 @@
         style="overflow-y: auto; border: 1px solid #ddd; padding: 10px"
       ></div>
     </div>
-    <div id="roomInfo" style="text-align: left; margin: 20px">
-      <h2 id="roomName"></h2>
-      <p id="roomDescription"></p>
-    </div>
+
     <div id="chatContainer" style="display: flex; height: 100%">
       <!-- メッセージ欄 -->
       <div
@@ -310,6 +312,7 @@
             document.getElementById('roomDescription')
           roomNameElement.textContent = data.name
           roomDescriptionElement.textContent = data.description
+          document.title = `${data.name} - Chat Room`
 
           return data
         } else {
