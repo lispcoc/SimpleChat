@@ -84,6 +84,7 @@
         const roomDescription = document
           .getElementById('roomDescription')
           .value.trim()
+        const roomPropaties = {}
 
         if (!roomName || !roomDescription) {
           alert('All fields are required.')
@@ -101,7 +102,8 @@
             },
             body: JSON.stringify({
               name: roomName,
-              description: roomDescription
+              description: roomDescription,
+              propaties: roomPropaties
             })
           })
 
