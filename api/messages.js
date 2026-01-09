@@ -27,6 +27,27 @@ const addMessage = (roomId, msg) => {
 module.exports = async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
   const roomId = req.query.roomId // URL パラメータから roomId を取得
+  const mode = req.query.mode
+
+  if (req.method === 'GET' && mode === 'roomInfo') {
+    // ルーム情報を返すエンドポイント
+    if (!roomId) {
+      res.status(400).json({ error: 'roomId is required' })
+      return
+    }
+
+    const room = getRoom(roomId)
+    if (room == null) {
+      res.status(400).json({ error: 'Room is not exist' })
+      return
+    }
+    res.status(200).json({
+      roomId,
+      name: room.name,
+      description: room.description
+    })
+    return
+  }
 
   if (!roomId) {
     res.status(400).json({ error: 'roomId is required' })
@@ -34,6 +55,10 @@ module.exports = async (req, res) => {
   }
 
   const room = getRoom(roomId)
+  if (room == null) {
+    res.status(400).json({ error: 'Room is not exist' })
+    return
+  }
 
   if (req.method === 'POST') {
     let body = ''
