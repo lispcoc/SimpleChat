@@ -327,10 +327,14 @@
       enterButton.addEventListener('click', enterRoom)
       leaveButton.addEventListener('click', leaveRoom)
 
-      // 初回メッセージ取得
-      fetchMessages()
-      // 定期的にメッセージを取得
-      pollMessages()
+      if (roomId == null) {
+          alert('ルームIDが不正です。')
+      } else {
+        // 初回メッセージ取得
+        fetchMessages()
+        // 定期的にメッセージを取得
+        pollMessages()
+      }
     </script>
   </body>
 </html>
