@@ -312,6 +312,15 @@
         }
       }
 
+      // UIをすべて隠す
+      function hideAllUI() {
+        enterButton.style.display = 'none' // 入室ボタンを非表示
+        usernameInput.style.display = 'none'
+        leaveButton.style.display = 'none' // 退室ボタンを非表示
+        inputDiv.style.display = 'none' // メッセージ入力フォームを非表示
+        messagesDiv.style.display = 'none'
+      }
+
       // メッセージを定期的に取得
       function pollMessages(interval = 5000) {
         setInterval(fetchMessages, interval) // 指定した間隔で fetchMessages を呼び出す
@@ -328,7 +337,8 @@
       leaveButton.addEventListener('click', leaveRoom)
 
       if (roomId == null) {
-          alert('ルームIDが不正です。')
+        hideAllUI()
+        alert('ルームIDが不正です。')
       } else {
         // 初回メッセージ取得
         fetchMessages()
