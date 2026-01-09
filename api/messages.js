@@ -125,6 +125,60 @@ module.exports = async (req, res) => {
     return
   }
 
+  if (req.method === 'POST' && mode === 'editRoom') {
+    let body = ''
+    req.on('data', chunk => {
+      body += chunk.toString()
+    })
+
+    req.on('end', async () => {
+      try {
+        const { roomId, password, name, description, specialKeys } =
+          JSON.parse(body)
+
+        if (!roomId || !password) {
+          res.status(400).json({ error: 'Room ID and password are required.' })
+          return
+        }
+
+        const room = await getRoom(roomId)
+        if (!room) {
+          res.status(404).json({ error: 'Room not found.' })
+          return
+        }
+
+        // パスワード認証
+        const isPasswordValid = await bcrypt.compare(password, room.password)
+        if (!isPasswordValid) {
+          res.status(403).json({ error: 'Invalid password.' })
+          return
+        }
+
+        // ルーム情報の更新
+        if (name) room.name = name
+        if (description) room.description = description
+        if (specialKeys) room.specialKeys = specialKeys
+
+        // データベースの更新
+        const query = `
+        UPDATE rooms
+        SET name = $2, description = $3, specialKeys = $4
+        WHERE id = $1
+      `
+        const values = [roomId, room.name, room.description, room.specialKeys]
+        await db.query(query, values)
+
+        res
+          .status(200)
+          .json({ success: true, message: 'Room updated successfully.' })
+      } catch (error) {
+        console.error('Error updating room:', error)
+        res.status(500).json({ error: 'Internal server error.' })
+      }
+    })
+    return
+  }
+
   if (req.method === 'GET' && mode === 'roomInfo') {
     // ルーム情報を返すエンドポイント
     if (!roomId) {

@@ -123,6 +123,7 @@
         ></div>
       </div>
     </div>
+    <div id="editRoom"></div>
 
     <script>
       const API_URL = '/api/messages'
@@ -134,6 +135,7 @@
       const enterButton = document.getElementById('enterButton')
       const leaveButton = document.getElementById('leaveButton')
       const usersDiv = document.getElementById('users')
+      const editRoomDiv = document.getElementById('editRoom')
 
       let isInRoom = false // 入室状態を管理するフラグ
       let currentUsername = '' // 現在のユーザー名を管理
@@ -364,6 +366,7 @@
             // 定期的にメッセージを取得
             pollMessages()
           }
+          editRoomDiv.innerHTML = `<a href="editRoom.html?roomId=${roomId}">部屋の編集</a>`
         }
       }
 

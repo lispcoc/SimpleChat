@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Room</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: #f9f9f9;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #0056b3;
+      }
+    </style>
+  </head>
+
+  <h1>Create a New Room</h1>
+  <form id="createRoomForm">
+    <label for="roomName">Room Name</label>
+    <input
+      type="text"
+      id="roomName"
+      name="roomName"
+      placeholder="Enter room name"
+      required
+    />
+
+    <label for="roomDescription">Room Description</label>
+    <textarea
+      id="roomDescription"
+      name="roomDescription"
+      placeholder="Enter room description"
+      rows="4"
+      required
+    ></textarea>
+
+    <label for="roomPassword">Room Password</label>
+    <input
+      type="password"
+      id="roomPassword"
+      name="roomPassword"
+      placeholder="Enter room password"
+      required
+    />
+
+    <label for="roomSpecialKey_1">特殊キーの設定(1)</label>
+    <input
+      type="text"
+      id="roomSpecialKey_1"
+      name="roomSpecialKey_1"
+      placeholder="特定の発言を検知するとランダムにテキストを表示します。(例: おみくじ)"
+    />
+    <label for="roomSpecialText_1">特殊テキストの設定(1)</label>
+    <textarea
+      id="roomSpecialText_1"
+      name="roomSpecialText_1"
+      placeholder="大吉&#13;&#10;中吉&#13;&#10;吉&#13;&#10;末吉&#13;&#10;凶"
+      rows="4"
+      required
+    ></textarea>
+
+    <button type="submit">Create Room</button>
+  </form>
+
+  <script>
+    const API_URL = '/api/messages'
+    const form = document.getElementById('createRoomForm')
+    const params = new URLSearchParams(window.location.search)
+    const roomId = params.get('roomId')
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault()
+
+      const roomName = document.getElementById('roomName').value.trim()
+      const roomDescription = document
+        .getElementById('roomDescription')
+        .value.trim()
+      const roomPassword = document.getElementById('roomPassword').value.trim()
+      const roomSpecialKey_1 = document
+        .getElementById('roomSpecialKey_1')
+        .value.trim()
+      const roomSpecialText_1 = document
+        .getElementById('roomSpecialText_1')
+        .value.trim()
+        .replace(/\r/g, '')
+        .split('\n')
+
+      let roomSpecialKeys = {}
+      if (roomSpecialKey_1) {
+        roomSpecialKeys[roomSpecialKey_1] = roomSpecialText_1
+      }
+
+      if (!roomId) {
+        alert('ルームIDが不正です。')
+        return
+      }
+
+      if (!roomName || !roomDescription || !roomPassword) {
+        alert('All fields are required.')
+        return
+      }
+
+      try {
+        const params = new URLSearchParams({
+          mode: 'createRoom'
+        })
+        const response = await fetch(`${API_URL}?${params.toString()}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            roomId: roomId,
+            name: roomName,
+            description: roomDescription,
+            password: roomPassword,
+            specialKeys: roomSpecialKeys
+          })
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          alert('Room created successfully!')
+          console.log(data)
+          form.reset()
+        } else {
+          const errorData = await response.json()
+          alert(`Error: ${errorData.error}`)
+        }
+      } catch (error) {
+        console.error('Error creating room:', error)
+        alert('An error occurred while creating the room.')
+      }
+    })
+  </script>
+</html>
