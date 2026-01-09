@@ -358,7 +358,7 @@
         hideAllUI()
         alert('ルームIDが不正です。')
       } else {
-        const roomData = getRoomInfo()
+        const roomData = await getRoomInfo()
         if (roomData == null) {
           hideAllUI()
         } else {
