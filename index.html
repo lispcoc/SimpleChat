@@ -1,292 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Simple Chat</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
 
-        #chat {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
+      #chat {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 10px;
+        border: 1px solid #ccc;
+      }
 
-        #chatContainer {
-            display: flex;
-            height: 100%;
-        }
+      #chatContainer {
+        display: flex;
+        height: 100%;
+      }
 
-        #messageSection {
-            flex: 3;
-            border-right: 1px solid #ccc;
-            padding: 10px;
-        }
+      #messageSection {
+        flex: 3;
+        border-right: 1px solid #ccc;
+        padding: 10px;
+      }
 
-        #userSection {
-            flex: 1;
-            padding: 10px;
-        }
+      #userSection {
+        flex: 1;
+        padding: 10px;
+      }
 
-        #messages {
+      #messages {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+      }
+
+      #users {
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+      }
+
+      #input {
+        display: flex;
+        margin-top: 10px;
+      }
+
+      #input input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+      }
+
+      #input button {
+        padding: 10px;
+        border: 1px solid #ccc;
+        background: #007bff;
+        color: white;
+      }
+
+      #controls {
+        margin-top: 10px;
+        padding: 10px;
+      }
+
+      #controls button {
+        padding: 10px;
+        margin-right: 5px;
+        border: 1px solid #ccc;
+        background: #28a745;
+        color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="controls">
+      <input type="text" id="usernameInput" placeholder="Enter your username" />
+      <button id="enterButton">Enter Room</button>
+      <button id="leaveButton" style="display: none">Leave Room</button>
+    </div>
+    <div id="inputDiv" style="margin-top: 10px; display: none">
+      <span
+        id="usernameDisplay"
+        style="margin-right: 10px; font-weight: bold"
+      ></span>
+      <input
+        type="text"
+        id="messageInput"
+        placeholder="Type your message..."
+        style="width: 80%"
+      />
+      <button id="sendButton">Send</button>
+    </div>
+
+    <!-- 入室者リスト -->
+    <div id="userSection" style="flex: 1; padding: 10px">
+      <span style="margin-right: 10px; font-weight: bold">現在の入室者: </span>
+      <div
+        id="users"
+        style="overflow-y: auto; border: 1px solid #ddd; padding: 10px"
+      ></div>
+    </div>
+    <div id="chatContainer" style="display: flex; height: 100%">
+      <!-- メッセージ欄 -->
+      <div
+        id="messageSection"
+        style="flex: 3; border-right: 1px solid #ccc; padding: 10px"
+      >
+        <div
+          id="messages"
+          style="
             height: 300px;
             overflow-y: auto;
             border: 1px solid #ddd;
             padding: 10px;
-        }
-
-        #users {
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        #input {
-            display: flex;
-            margin-top: 10px;
-        }
-
-        #input input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
-        #input button {
-            padding: 10px;
-            border: 1px solid #ccc;
-            background: #007BFF;
-            color: white;
-        }
-
-        #controls {
-            margin-top: 10px;
-            padding: 10px;
-        }
-
-        #controls button {
-            padding: 10px;
-            margin-right: 5px;
-            border: 1px solid #ccc;
-            background: #28a745;
-            color: white;
-        }
-    </style>
-</head>
-
-<body>
-    <div id="controls">
-        <input type="text" id="usernameInput" placeholder="Enter your username">
-        <button id="enterButton">Enter Room</button>
-        <button id="leaveButton" style="display: none;">Leave Room</button>
-    </div>
-    <div id="inputDiv" style="margin-top: 10px; display: none;">
-        <span id="usernameDisplay" style="margin-right: 10px; font-weight: bold;"></span>
-        <input type="text" id="messageInput" placeholder="Type your message..." style="width: 80%;">
-        <button id="sendButton">Send</button>
-    </div>
-
-    <!-- 入室者リスト -->
-    <div id="userSection" style="flex: 1; padding: 10px;">
-        <span style="margin-right: 10px; font-weight: bold;">現在の入室者: </span>
-        <div id="users" style="overflow-y: auto; border: 1px solid #ddd; padding: 10px;"></div>
-    </div>
-    <div id="chatContainer" style="display: flex; height: 100%;">
-
-        <!-- メッセージ欄 -->
-        <div id="messageSection" style="flex: 3; border-right: 1px solid #ccc; padding: 10px;">
-            <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;"></div>
-        </div>
-
+          "
+        ></div>
+      </div>
     </div>
 
     <script>
-        const API_URL = '/api/messages';
-        const messagesDiv = document.getElementById('messages');
-        const inputDiv = document.getElementById('inputDiv');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const usernameInput = document.getElementById('usernameInput');
-        const enterButton = document.getElementById('enterButton');
-        const leaveButton = document.getElementById('leaveButton');
-        const usersDiv = document.getElementById('users');
+      const API_URL = '/api/messages'
+      const messagesDiv = document.getElementById('messages')
+      const inputDiv = document.getElementById('inputDiv')
+      const messageInput = document.getElementById('messageInput')
+      const sendButton = document.getElementById('sendButton')
+      const usernameInput = document.getElementById('usernameInput')
+      const enterButton = document.getElementById('enterButton')
+      const leaveButton = document.getElementById('leaveButton')
+      const usersDiv = document.getElementById('users')
 
-        let isInRoom = false; // 入室状態を管理するフラグ
-        let currentUsername = ''; // 現在のユーザー名を管理
-        let lastUpdated = 0; // 最後に受信したメッセージの更新タイムスタンプ
+      let isInRoom = false // 入室状態を管理するフラグ
+      let currentUsername = '' // 現在のユーザー名を管理
+      let lastUpdated = 0 // 最後に受信したメッセージの更新タイムスタンプ
 
-        // 入室者一覧を取得して表示
-        async function fetchUsers() {
-            const response = await fetch(API_URL);
-            const data = await response.json();
+      // 入室者一覧を取得して表示
+      async function fetchUsers() {
+        const params = new URLSearchParams({
+          roomId: 'value1'
+        })
+        const response = await fetch(`${API_URL}?${params.toString()}`)
+        const data = await response.json()
 
-            if (response.status === 200) {
-                console.log(data);
-                // 入室者一覧を表示
-                const usersDiv = document.getElementById('users');
-                usersDiv.innerHTML = ''; // リストをクリア
-                data.users.forEach((user) => {
-                    const userElement = document.createElement('div');
-                    userElement.textContent = user.username || 'Unknown'; // ユーザー名を表示
-                    usersDiv.appendChild(userElement);
-                });
+        if (response.status === 200) {
+          console.log(data)
+          // 入室者一覧を表示
+          const usersDiv = document.getElementById('users')
+          usersDiv.innerHTML = '' // リストをクリア
+          data.users.forEach(user => {
+            const userElement = document.createElement('div')
+            userElement.textContent = user.username || 'Unknown' // ユーザー名を表示
+            usersDiv.appendChild(userElement)
+          })
 
-                // 自分が入室済みか確認
-                const user = data.users.find((user) => user.ip === data.clientIp)
-                if (user) {
-                    isInRoom = true; // 入室状態を更新
-                    currentUsername = user.username; // 現在のユーザー名を保存
+          // 自分が入室済みか確認
+          const user = data.users.find(user => user.ip === data.clientIp)
+          if (user) {
+            isInRoom = true // 入室状態を更新
+            currentUsername = user.username // 現在のユーザー名を保存
+          } else {
+            isInRoom = false // 入室していない状態に更新
+          }
+
+          updateUI() // UI を更新
+        }
+      }
+      // メッセージを取得して表示
+      async function fetchMessages() {
+        try {
+          const params = new URLSearchParams({
+            lastUpdated: lastUpdated,
+            roomId: 'value1'
+          })
+          const response = await fetch(`${API_URL}?${params.toString()}`)
+          if (response.status === 200) {
+            const data = await response.json()
+            lastUpdated = data.lastUpdated // サーバーから最新の更新タイムスタンプを取得
+
+            // メッセージを表示
+            const messagesDiv = document.getElementById('messages')
+            messagesDiv.innerHTML = '' // メッセージをクリア
+            data.messages
+              .slice()
+              .reverse()
+              .forEach(msg => {
+                const messageElement = document.createElement('div')
+                if (msg.system) {
+                  // システムメッセージのスタイル
+                  messageElement.style.color = 'gray'
+                  messageElement.textContent = `[SYSTEM] ${msg.text}`
                 } else {
-                    isInRoom = false; // 入室していない状態に更新
+                  // 通常メッセージ
+                  const username = msg.username || 'Unknown'
+                  const formattedTime = new Date(msg.timestamp).toLocaleString()
+                  messageElement.textContent = `${username}: ${msg.text} (${formattedTime})`
                 }
+                messagesDiv.appendChild(messageElement)
+              })
 
-                updateUI(); // UI を更新
-            }
+            messagesDiv.scrollTop = messagesDiv.scrollHeight
+
+            // 入室者一覧を更新
+            fetchUsers()
+          }
+        } catch (error) {
+          console.error('Error fetching messages:', error)
         }
-        // メッセージを取得して表示
-        async function fetchMessages() {
-            try {
-                const response = await fetch(`${API_URL}?lastUpdated=${lastUpdated}`);
-                if (response.status === 200) {
-                    const data = await response.json();
-                    lastUpdated = data.lastUpdated; // サーバーから最新の更新タイムスタンプを取得
+      }
 
-                    // メッセージを表示
-                    const messagesDiv = document.getElementById('messages');
-                    messagesDiv.innerHTML = ''; // メッセージをクリア
-                    data.messages.slice().reverse().forEach((msg) => {
-                        const messageElement = document.createElement('div');
-                        if (msg.system) {
-                            // システムメッセージのスタイル
-                            messageElement.style.color = 'gray';
-                            messageElement.textContent = `[SYSTEM] ${msg.text}`;
-                        } else {
-                            // 通常メッセージ
-                            const username = msg.username || 'Unknown';
-                            const formattedTime = new Date(msg.timestamp).toLocaleString();
-                            messageElement.textContent = `${username}: ${msg.text} (${formattedTime})`;
-                        }
-                        messagesDiv.appendChild(messageElement);
-                    });
-
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-                    // 入室者一覧を更新
-                    fetchUsers();
-                }
-            } catch (error) {
-                console.error('Error fetching messages:', error);
-            }
+      // 入室
+      async function enterRoom() {
+        const username = usernameInput.value.trim()
+        if (!username) {
+          alert('Please enter a username.')
+          return
         }
 
-        // 入室
-        async function enterRoom() {
-            const username = usernameInput.value.trim();
-            if (!username) {
-                alert('Please enter a username.');
-                return;
-            }
+        const params = new URLSearchParams({
+          roomId: 'value1'
+        })
+        const response = await fetch(`${API_URL}?${params.toString()}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'enter', username })
+        })
 
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'enter', username }),
-            });
-
-            if (response.ok) {
-                currentUsername = username; // 現在のユーザー名を保存
-                isInRoom = true; // 入室状態を更新
-                updateUI(); // UI を更新
-                fetchMessages();
-            } else {
-                const errorData = await response.json();
-                alert(errorData.error);
-            }
+        if (response.ok) {
+          currentUsername = username // 現在のユーザー名を保存
+          isInRoom = true // 入室状態を更新
+          updateUI() // UI を更新
+          fetchMessages()
+        } else {
+          const errorData = await response.json()
+          alert(errorData.error)
         }
+      }
 
-        // 退室
-        async function leaveRoom() {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'leave' }),
-            });
+      // 退室
+      async function leaveRoom() {
+        const params = new URLSearchParams({
+          roomId: 'value1'
+        })
+        const response = await fetch(`${API_URL}?${params.toString()}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'leave' })
+        })
 
-            if (response.ok) {
-                isInRoom = false; // 入室状態を更新
-                updateUI(); // UI を更新
-                fetchMessages();
-            } else {
-                const errorData = await response.json();
-                alert(errorData.error);
-            }
+        if (response.ok) {
+          isInRoom = false // 入室状態を更新
+          updateUI() // UI を更新
+          fetchMessages()
+        } else {
+          const errorData = await response.json()
+          alert(errorData.error)
         }
+      }
 
-        // メッセージ送信
-        async function sendMessage() {
-            const text = messageInput.value;
-            if (text) {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'message', text }),
-                });
+      // メッセージ送信
+      async function sendMessage() {
+        const text = messageInput.value
+        if (text) {
+          const params = new URLSearchParams({
+            roomId: 'value1'
+          })
+          const response = await fetch(`${API_URL}?${params.toString()}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'message', text })
+          })
 
-                if (response.ok) {
-                    messageInput.value = '';
-                    fetchMessages();
-                } else {
-                    const errorData = await response.json();
-                    alert(errorData.error);
-                }
-            }
+          if (response.ok) {
+            messageInput.value = ''
+            fetchMessages()
+          } else {
+            const errorData = await response.json()
+            alert(errorData.error)
+          }
         }
+      }
 
-        // UI の更新
-        function updateUI() {
-            const usernameDisplay = document.getElementById('usernameDisplay');
-            if (isInRoom) {
-                enterButton.style.display = 'none'; // 入室ボタンを非表示
-                usernameInput.style.display = 'none';
-                leaveButton.style.display = 'inline-block'; // 退室ボタンを表示
-                inputDiv.style.display = 'block'; // メッセージ入力フォームを表示
-                usernameDisplay.textContent = currentUsername; // ユーザー名を表示
-            } else {
-                enterButton.style.display = 'inline-block'; // 入室ボタンを表示
-                usernameInput.style.display = 'inline-block';
-                leaveButton.style.display = 'none'; // 退室ボタンを非表示
-                inputDiv.style.display = 'none'; // メッセージ入力フォームを非表示
-                usernameDisplay.textContent = ''; // ユーザー名をクリア
-            }
+      // UI の更新
+      function updateUI() {
+        const usernameDisplay = document.getElementById('usernameDisplay')
+        if (isInRoom) {
+          enterButton.style.display = 'none' // 入室ボタンを非表示
+          usernameInput.style.display = 'none'
+          leaveButton.style.display = 'inline-block' // 退室ボタンを表示
+          inputDiv.style.display = 'block' // メッセージ入力フォームを表示
+          usernameDisplay.textContent = currentUsername // ユーザー名を表示
+        } else {
+          enterButton.style.display = 'inline-block' // 入室ボタンを表示
+          usernameInput.style.display = 'inline-block'
+          leaveButton.style.display = 'none' // 退室ボタンを非表示
+          inputDiv.style.display = 'none' // メッセージ入力フォームを非表示
+          usernameDisplay.textContent = '' // ユーザー名をクリア
         }
+      }
 
-        // メッセージを定期的に取得
-        function pollMessages(interval = 5000) {
-            setInterval(fetchMessages, interval); // 指定した間隔で fetchMessages を呼び出す
+      // メッセージを定期的に取得
+      function pollMessages(interval = 5000) {
+        setInterval(fetchMessages, interval) // 指定した間隔で fetchMessages を呼び出す
+      }
+
+      sendButton.addEventListener('click', sendMessage)
+      messageInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+          sendMessage()
         }
+      })
 
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
+      enterButton.addEventListener('click', enterRoom)
+      leaveButton.addEventListener('click', leaveRoom)
 
-        enterButton.addEventListener('click', enterRoom);
-        leaveButton.addEventListener('click', leaveRoom);
-
-        // 初回メッセージ取得
-        fetchMessages();
-        // 定期的にメッセージを取得
-        pollMessages();
+      // 初回メッセージ取得
+      fetchMessages()
+      // 定期的にメッセージを取得
+      pollMessages()
     </script>
-</body>
-
+  </body>
 </html>
