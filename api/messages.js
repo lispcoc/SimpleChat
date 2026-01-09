@@ -356,7 +356,7 @@ module.exports = async (req, res) => {
       res.status(200).json({
         messages: room.messages.slice(-20),
         users: Object.entries(room.users).map(([ip, user]) => {
-          return { username: user.username }
+          return { ip: ip, username: user.username }
         }),
         clientIp,
         lastUpdated: room.lastUpdated
