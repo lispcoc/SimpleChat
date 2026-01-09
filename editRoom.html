@@ -48,6 +48,9 @@
 
   <div class="main">
     <h2>部屋の編集</h2>
+
+    <div id="backToRoom"></div>
+
     <form id="loginRoomEdit">
       <label for="roomName">パスワード</label>
       <input
@@ -114,6 +117,7 @@
 
   <script>
     const API_URL = '/api/messages'
+    const backToRoom = document.getElementById('backToRoom')
     const loginForm = document.getElementById('loginRoomEdit')
     const loginButton = document.getElementById('loginButton')
     const editForm = document.getElementById('createRoomForm')
@@ -253,5 +257,13 @@
       }
       editButton.disabled = false
     })
+
+    const backLink = document.createElement('a')
+    backLink.href = `/chat.html?roomId=${roomId}`
+    backLink.textContent = '部屋に戻る'
+    backLink.style.textDecoration = 'none'
+    backLink.style.color = 'blue'
+
+    backToRoom.appendChild(backLink)
   </script>
 </html>
