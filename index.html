@@ -81,6 +81,11 @@
         padding: 2px;
         margin-right: 5px;
       }
+
+      span.timestamp {
+        size: -1;
+        color: 'gray';
+      }
     </style>
   </head>
 
@@ -101,7 +106,7 @@
         placeholder="Type your message..."
         style="width: 80%"
       />
-      <button id="sendButton">発言</button>
+      <button id="sendButton" style="white-space: nowrap">発言</button>
     </div>
 
     <div id="roomNameSection" style="margin: 20px">
@@ -220,7 +225,7 @@
                   // 通常メッセージ
                   const username = msg.username || 'Unknown'
                   const formattedTime = new Date(msg.timestamp).toLocaleString()
-                  messageElement.textContent = `${username}: ${msg.text} (${formattedTime})`
+                  messageElement.textContent = `${username}: ${msg.text} <span class='timestamp'>(${formattedTime})</span>`
                 }
                 messagesDiv.appendChild(messageElement)
                 const hr = document.createElement('hr')
