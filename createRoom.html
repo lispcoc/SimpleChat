@@ -11,8 +11,12 @@
         padding: 20px;
       }
 
+      div.main {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
       form {
-        max-width: 400px;
         margin: 0 auto;
         padding: 20px;
         border: 1px solid #ccc;
@@ -42,52 +46,54 @@
     </style>
   </head>
   <body>
-    <h2>部屋の作成</h2>
-    <form id="createRoomForm">
-      <label for="roomName">部屋の名前 (必須)</label>
-      <input
-        type="text"
-        id="roomName"
-        name="roomName"
-        placeholder="部屋の名前"
-        required
-      />
+    <div class="main">
+      <h2>部屋の作成</h2>
+      <form id="createRoomForm">
+        <label for="roomName">部屋の名前 (必須)</label>
+        <input
+          type="text"
+          id="roomName"
+          name="roomName"
+          placeholder="部屋の名前"
+          required
+        />
 
-      <label for="roomDescription">部屋の説明 (必須)</label>
-      <textarea
-        id="roomDescription"
-        name="roomDescription"
-        placeholder="部屋の説明"
-        rows="4"
-        required
-      ></textarea>
+        <label for="roomDescription">部屋の説明 (必須)</label>
+        <textarea
+          id="roomDescription"
+          name="roomDescription"
+          placeholder="部屋の説明"
+          rows="4"
+          required
+        ></textarea>
 
-      <label for="roomPassword">パスワード (必須)</label>
-      <input
-        type="password"
-        id="roomPassword"
-        name="roomPassword"
-        placeholder="パスワード"
-        required
-      />
+        <label for="roomPassword">パスワード (必須)</label>
+        <input
+          type="password"
+          id="roomPassword"
+          name="roomPassword"
+          placeholder="パスワード"
+          required
+        />
 
-      <label for="roomSpecialKey_1">特殊キーの設定</label>
-      <input
-        type="text"
-        id="roomSpecialKey_1"
-        name="roomSpecialKey_1"
-        placeholder="特定の発言を検知するとランダムにテキストを表示します。(例: おみくじ)"
-      />
-      <label for="roomSpecialText_1">特殊テキストの設定</label>
-      <textarea
-        id="roomSpecialText_1"
-        name="roomSpecialText_1"
-        placeholder="大吉&#13;&#10;中吉&#13;&#10;吉&#13;&#10;末吉&#13;&#10;凶"
-        rows="8"
-      ></textarea>
+        <label for="roomSpecialKey_1">特殊キーの設定</label>
+        <input
+          type="text"
+          id="roomSpecialKey_1"
+          name="roomSpecialKey_1"
+          placeholder="特定の発言を検知するとランダムにテキストを表示します。(例: おみくじ)"
+        />
+        <label for="roomSpecialText_1">特殊テキストの設定</label>
+        <textarea
+          id="roomSpecialText_1"
+          name="roomSpecialText_1"
+          placeholder="大吉&#13;&#10;中吉&#13;&#10;吉&#13;&#10;末吉&#13;&#10;凶"
+          rows="8"
+        ></textarea>
 
-      <button type="submit">Create Room</button>
-    </form>
+        <button type="submit">Create Room</button>
+      </form>
+    </div>
 
     <script>
       const API_URL = '/api/messages'
