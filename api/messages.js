@@ -20,7 +20,7 @@ const loadRoomsFromDB = async () => {
         name: row.name,
         description: row.description,
         password: row.password,
-        specialKeys: row.special_keys ? JSON.parse(row.special_keys) : {}
+        specialKeys: row.special_keys ? row.special_keys : {}
       }
 
       // 現在の最大ルームIDを更新
