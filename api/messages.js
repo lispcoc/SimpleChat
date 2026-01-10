@@ -123,6 +123,7 @@ const loadRoomsFromDB = async () => {
 
       const roomId = row.id
       const tableName = `messages_${roomId}`
+      createMessageTable(roomId)
       const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
       const messageResults = db.query(messageQuery)
       if (messageResults.rows) {
