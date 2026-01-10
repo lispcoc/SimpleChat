@@ -14,7 +14,7 @@ let flushingMessages = false
 let currentRoomId = 0
 let roomCreateCount = {}
 const messageBuffer = {} // メッセージを一時的に保存するバッファ
-const BATCH_SIZE = 10 // バッチ書き込みのサイズ
+const BATCH_SIZE = 1 // バッチ書き込みのサイズ
 const BATCH_INTERVAL = 60 * 60 * 1000 // バッチ書き込みの間隔（ミリ秒）
 const MAX_MESSAGES_PER_TABLE = 1000 // 各テーブルの最大メッセージ数
 const ROOM_CREATE_INTERVAL = 7 * 24 * 60 * 60 * 1000
@@ -225,7 +225,7 @@ module.exports = async (req, res) => {
   if (req.method === 'GET' && mode === 'stats') {
     res.status(200).json({
       loadCount: loadCount,
-      rooms: rooms,
+      flushingMessages: flushingMessages,
       roomDataLoaded: roomDataLoaded,
       roomDataLoading: roomDataLoading,
       roomMessageLoaded: roomMessageLoaded,
