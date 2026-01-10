@@ -209,6 +209,19 @@ const addMessage = async (roomId, msg, addDBBuffer = true) => {
   }
 }
 
+const loadRooms = async () => {
+  loadCount++
+  if (!roomDataLoaded) {
+    loadRoomsFromDB()
+  }
+  if (!roomMessageLoaded) {
+    loadMessagesFromDB()
+  }
+  if (roomDataLoaded && roomMessageLoaded) {
+    clearInterval(roomLoadHandle)
+  }
+}
+
 module.exports = async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
   const roomId = req.query.roomId // URL パラメータから roomId を取得
@@ -226,6 +239,7 @@ module.exports = async (req, res) => {
     return
   }
 
+  await loadRooms()
   if (!roomDataLoaded || !roomMessageLoaded) {
     res
       .status(400)
@@ -635,20 +649,3 @@ setInterval(() => {
 setInterval(() => {
   Object.keys(messageBuffer).forEach(roomId => flushMessagesToDB(roomId))
 }, BATCH_INTERVAL)
-
-const loadRooms = () => {
-  loadCount++
-  if (!roomDataLoaded) {
-    loadRoomsFromDB()
-  }
-  if (!roomMessageLoaded) {
-    loadMessagesFromDB()
-  }
-  if (roomDataLoaded && roomMessageLoaded) {
-    clearInterval(roomLoadHandle)
-  }
-}
-
-roomLoadHandle = setInterval(loadRooms, 10 * 1000)
-
-loadRooms()
