@@ -8,8 +8,9 @@ let roomDataLoaded = false
 let currentRoomId = 0
 let roomCreateCount = {}
 const messageBuffer = {} // メッセージを一時的に保存するバッファ
-const BATCH_SIZE = 1 // バッチ書き込みのサイズ
+const BATCH_SIZE = 10 // バッチ書き込みのサイズ
 const BATCH_INTERVAL = 60 * 60 * 1000 // バッチ書き込みの間隔（ミリ秒）
+const MAX_MESSAGES_PER_TABLE = 1000 // 各テーブルの最大メッセージ数
 
 const createMessageTable = async roomId => {
   const tableName = `messages_${roomId}`
@@ -73,6 +74,24 @@ const flushMessagesToDB = async roomId => {
     )
 
     messageBuffer[roomId] = [] // バッファをクリア
+
+    // レコード数をチェックして古いものを削除
+    const deleteQuery = `
+      DELETE FROM ${tableName}
+      WHERE ctid IN (
+        SELECT ctid
+        FROM ${tableName}
+        ORDER BY timestamp ASC
+        LIMIT (
+          SELECT COUNT(*) - $1
+          FROM ${tableName}
+        )
+      );
+    `
+    await db.query(deleteQuery, [MAX_MESSAGES_PER_TABLE])
+    console.log(
+      `Deleted old messages from ${tableName} to maintain the limit of ${MAX_MESSAGES_PER_TABLE}`
+    )
   } catch (error) {
     console.error('Error flushing messages to DB:', error, placeholders)
   }
