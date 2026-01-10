@@ -124,16 +124,20 @@ const loadRoomsFromDB = async () => {
       const roomId = row.id
       const tableName = `messages_${roomId}`
       const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
-      const result = db.query(query)
-      if (result.rows) {
-        result.rows.forEach(row => {
-          addMessage(roomId, {
-            text: row.text,
-            color: row.color,
-            timestamp: row.timestamp,
-            username: row.username,
-            system: row.system
-          })
+      const messageResults = db.query(messageQuery)
+      if (messageResults.rows) {
+        messageResults.rows.forEach(row => {
+          addMessage(
+            roomId,
+            {
+              text: row.text,
+              color: row.color,
+              timestamp: row.timestamp,
+              username: row.username,
+              system: row.system
+            },
+            false
+          )
         })
       }
     })
@@ -152,7 +156,7 @@ const getRoom = async roomId => {
   return rooms[roomId]
 }
 
-const addMessage = async (roomId, msg) => {
+const addMessage = async (roomId, msg, addDBBuffer = true) => {
   const room = await getRoom(roomId)
   room.messages.push(msg)
   room.lastUpdated = Date.now()
