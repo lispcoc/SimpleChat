@@ -15,8 +15,8 @@ const createMessageTable = async roomId => {
   const tableName = `messages_${roomId}`
   const query = `
     CREATE TABLE IF NOT EXISTS ${tableName} (
-      id SERIAL PRIMARY KEY,
       text TEXT NOT NULL,
+      color INTEGER DEFAULT 0,
       timestamp TIMESTAMP NOT NULL,
       username VARCHAR(255),
       system BOOLEAN DEFAULT FALSE
