@@ -120,7 +120,7 @@
         <button id="leaveButton" style="display: none">退室</button>
       </div>
       <div id="inputDiv" style="display: none">
-        <span id="usernameDisplay"></span>
+        <span id="usernameDisplay" class="username"></span>
         <input
           type="text"
           id="messageInput"
@@ -224,7 +224,7 @@
               .slice()
               .reverse()
               .forEach(msg => {
-                const messageElement = document.createElement('div')
+                const messageElement = document.createElement('span')
                 if (msg.system) {
                   // システムメッセージのスタイル
                   messageElement.style.color = 'gray'

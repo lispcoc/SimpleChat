@@ -271,7 +271,6 @@
           const data = await response.json()
           alert('変更を反映しました。')
           console.log(data)
-          editForm.reset()
         } else {
           const errorData = await response.json()
           alert(`Error: ${errorData.error}`)
