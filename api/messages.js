@@ -14,8 +14,7 @@ const getRoomList = async () => {
     const query = `SELECT id, name, description, password, special_keys, options FROM rooms`
     const result = await db.query(query)
     if (!result.rows || !result.rows[0]) {
-      res.status(400).json({ error: 'ルームリストが取得できませんでした。' })
-      return
+      return []
     }
     const roomList = result.rows.map(row => {
       return { id: row.id, name: row.name }
@@ -105,7 +104,7 @@ const getUsers = async roomId => {
   } catch (error) {
     console.error('Error loading rooms from database:', error)
   }
-  return []
+  return null
 }
 
 const deleteUser = async (roomId, user) => {
@@ -476,12 +475,14 @@ module.exports = async (req, res) => {
             return
           }
 
+          /*
           addUser(roomId, {
             username: username,
             color: 0,
             lastactivity: Date.now(),
             ip: ip
           })
+          */
 
           addMessage(roomId, {
             text: `${username} さんが入室しました。`,
