@@ -93,7 +93,7 @@ const getUsers = async roomId => {
     const result = await db.query(query)
 
     if (!result.rows || !result.rows[0]) {
-      return null
+      return []
     }
 
     result.rows.map(row => ({
@@ -105,7 +105,7 @@ const getUsers = async roomId => {
   } catch (error) {
     console.error('Error loading rooms from database:', error)
   }
-  return null
+  return []
 }
 
 const deleteUser = async (roomId, user) => {
@@ -152,7 +152,7 @@ const loadMessagesFromDB = async roomId => {
     const result = await db.query(messageQuery)
 
     if (!result.rows || !result.rows[0]) {
-      return null
+      return []
     }
 
     const messages = result.rows.map(row => ({
@@ -166,7 +166,7 @@ const loadMessagesFromDB = async roomId => {
   } catch (error) {
     console.error('Error loading messages from database:', error)
   }
-  return null
+  return []
 }
 
 const getRoom = async roomId => {
@@ -580,7 +580,7 @@ module.exports = async (req, res) => {
       const messages = await loadMessagesFromDB(roomId)
       res.status(200).json({
         messages: messages.slice(-20),
-        users: users,
+        users: users || [],
         clientIp,
         lastUpdated: Date.now()
       })
