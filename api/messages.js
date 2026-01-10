@@ -411,7 +411,9 @@ module.exports = async (req, res) => {
     const clientIp =
       req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
-    if (clientLastUpdated < lastUpdated) {
+    if (room.options.private && !room.users[clientIp]) {
+      res.status(204).end()
+    } else if (clientLastUpdated < lastUpdated) {
       res.status(200).json({
         messages: room.messages.slice(-20),
         users: Object.entries(room.users).map(([ip, user]) => {

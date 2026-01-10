@@ -85,6 +85,12 @@
         required
       ></textarea>
 
+      <label for="roomOptionPrivate">未入室者のログ確認</label>
+      <select name="roomOptionPrivate" id="roomOptionPrivate">
+        <option value="true">許可する</option>
+        <option value="false">許可しない</option>
+      </select>
+
       <label for="roomPassword">パスワード (必須)</label>
       <input
         type="password"
@@ -173,8 +179,8 @@
               break
             }
             console.log(key)
-            roomSpecialKeyList[i] = key
-            roomSpecialTextList[i] = data.specialKeys[key]
+            roomSpecialKeyList[i].value = key
+            roomSpecialTextList[i].value = data.specialKeys[key]
             i++
           }
 
@@ -213,7 +219,12 @@
         roomSpecialKeys[roomSpecialKey_1] = roomSpecialText_1
       }
 
-      let roomOptions = {}
+      const roomOptionPrivate =
+        document.getElementById('roomOptionPrivate').value.trim() === 'true'
+
+      let roomOptions = {
+        private: roomOptionPrivate
+      }
 
       if (!roomId) {
         alert('ルームIDが不正です。')
