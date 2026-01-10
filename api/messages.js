@@ -49,7 +49,7 @@ const flushMessagesToDB = async roomId => {
     const values = messagesToSave.flatMap(msg => [
       msg.text,
       0,
-      msg.timestamp,
+      new Date(msg.timestamp).toISOString(),
       msg.username || 'Unknown',
       msg.system || false
     ])
