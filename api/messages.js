@@ -43,11 +43,12 @@ const flushMessagesToDB = async roomId => {
 
   try {
     const query = `
-    INSERT INTO ${tableName} (text, timestamp, username, system)
-    VALUES ($1, $2, $3, $4);
+    INSERT INTO ${tableName} (text, color, timestamp, username, system)
+    VALUES ($1, $2, $3, $4, $5);
   `
     const values = messagesToSave.flatMap(msg => [
       msg.text,
+      0,
       msg.timestamp,
       msg.username || null,
       msg.system || false
