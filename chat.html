@@ -95,6 +95,10 @@
         padding: 2px;
       }
 
+      span.username {
+        font-weight: bold;
+      }
+
       span.timestamp {
         font-size: 0.8em;
         color: gray;
@@ -224,7 +228,11 @@
                 } else {
                   // 通常メッセージ
                   const username = msg.username || 'Unknown'
-                  messageElement.textContent = `${username}: ${msg.text}`
+                  const usenameElement = document.createElement('span')
+                  usenameElement.className = 'username'
+                  usenameElement.textContent = `${username}`
+                  messageElement.textContent = `> ${msg.text}`
+                  messagesDiv.appendChild(usenameElement)
                 }
                 messagesDiv.appendChild(messageElement)
                 if (msg.timestamp) {
@@ -337,10 +345,7 @@
           const roomDescriptionElement =
             document.getElementById('roomDescription')
           roomNameElement.textContent = data.name
-          roomDescriptionElement.textContent = data.description.replace(
-            /\n/g,
-            '<br>'
-          )
+          roomDescriptionElement.innerText = data.description
           document.title = `${data.name} - Chat Room`
           if (data.options.private) {
             messagesDiv.innerHTML = '未入室者閲覧禁止設定です。'
