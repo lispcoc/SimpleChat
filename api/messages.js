@@ -53,7 +53,7 @@ const createUserTable = async roomId => {
       username VARCHAR(255),
       color INTEGER DEFAULT 0,
       lastactivity TIMESTAMP NOT NULL,
-      ip TEXT NOT NULL,
+      ip TEXT NOT NULL
     );
   `
   try {
