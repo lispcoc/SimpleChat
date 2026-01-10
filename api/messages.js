@@ -95,12 +95,13 @@ const getUsers = async roomId => {
       return []
     }
 
-    result.rows.map(row => ({
+    const users = result.rows.map(row => ({
       username: row.username,
       color: row.color,
       lastactivity: row.lastactivity,
       ip: row.ip
     }))
+    return users
   } catch (error) {
     console.error('Error loading rooms from database:', error)
   }
