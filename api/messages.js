@@ -236,7 +236,8 @@ module.exports = async (req, res) => {
     res.status(200).json({
       roomId,
       name: room.name,
-      description: room.description
+      description: room.description,
+      options: room.options
     })
     return
   }

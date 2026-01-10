@@ -342,6 +342,9 @@
             '<br>'
           )
           document.title = `${data.name} - Chat Room`
+          if (data.options.private) {
+            messagesDiv.innerHTML = '未入室者閲覧禁止設定です。'
+          }
 
           return data
         } else {
