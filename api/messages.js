@@ -295,6 +295,7 @@ module.exports = async (req, res) => {
         })
       } catch (error) {
         res.status(400).json({ error: 'Invalid JSON.' })
+        console.error(error)
       }
     })
     return
@@ -354,8 +355,8 @@ module.exports = async (req, res) => {
           .status(200)
           .json({ success: true, message: 'Room updated successfully.' })
       } catch (error) {
-        console.error('Error updating room:', error)
         res.status(500).json({ error: 'Internal server error.' })
+        console.error('Error updating room:', error)
       }
     })
     return
@@ -423,8 +424,8 @@ module.exports = async (req, res) => {
           options: room.options
         })
       } catch (error) {
-        console.error('Error updating room:', error)
         res.status(500).json({ error: 'Internal server error.' })
+        console.error('Error updating room:', error)
       }
     })
     return
@@ -453,7 +454,7 @@ module.exports = async (req, res) => {
         const { action, text, username } = parsedBody
 
         if (action === 'enter') {
-          const users = getUsers(roomId)
+          const users = getUsers(roomId) || []
           const usersLimit = room.options.usersLimit || 10
           if (users.length >= usersLimit) {
             res.status(400).json({ error: 'これ以上入室できません' })
@@ -475,14 +476,12 @@ module.exports = async (req, res) => {
             return
           }
 
-          /*
           addUser(roomId, {
             username: username,
             color: 0,
             lastactivity: Date.now(),
             ip: ip
           })
-          */
 
           addMessage(roomId, {
             text: `${username} さんが入室しました。`,
@@ -565,6 +564,7 @@ module.exports = async (req, res) => {
         }
       } catch (error) {
         res.status(400).json({ error: 'Invalid JSON' })
+        console.error(error)
       }
     })
   } else if (req.method === 'GET') {
