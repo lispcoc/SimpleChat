@@ -64,12 +64,10 @@ module.exports = async (req, res) => {
     const ROOM_CREATE_INTERVAL = 7 * 24 * 60 * 60 * 1000
     const MAX_ROOMS = 1000
     if (Object.keys(rooms).length > MAX_ROOMS) {
-      res
-        .status(400)
-        .json({
-          error:
-            '部屋数が上限に到達しています。新規受付けの再開をお待ちください。'
-        })
+      res.status(400).json({
+        error:
+          '部屋数が上限に到達しています。新規受付けの再開をお待ちください。'
+      })
       return
     }
 
@@ -88,7 +86,8 @@ module.exports = async (req, res) => {
 
     req.on('end', async () => {
       try {
-        const { name, description, password, specialKeys } = JSON.parse(body)
+        const { name, description, password, specialKeys, options } =
+          JSON.parse(body)
 
         if (!name || !description || !password) {
           res
@@ -112,15 +111,16 @@ module.exports = async (req, res) => {
 
         // データベースに保存
         const query = `
-          INSERT INTO rooms (name, description, password, special_keys, created_at)
-          VALUES ($1, $2, $3, $4, NOW())
+          INSERT INTO rooms (name, description, password, special_keys, created_at, options)
+          VALUES ($1, $2, $3, $4, $5, NOW())
           RETURNING id;
         `
         const values = [
           name,
           description,
           hashedPassword,
-          JSON.stringify(specialKeys)
+          JSON.stringify(specialKeys),
+          options
         ]
         const result = await db.query(query, values)
         rooms[id] = {
@@ -130,7 +130,8 @@ module.exports = async (req, res) => {
           name,
           description,
           password: hashedPassword,
-          specialKeys
+          specialKeys,
+          options
         }
         roomCreateCount[ip] = Date.now()
 
@@ -154,7 +155,7 @@ module.exports = async (req, res) => {
 
     req.on('end', async () => {
       try {
-        const { roomId, password, name, description, specialKeys } =
+        const { roomId, password, name, description, specialKeys, options } =
           JSON.parse(body)
 
         if (!roomId || !password) {
@@ -179,14 +180,21 @@ module.exports = async (req, res) => {
         if (name) room.name = name
         if (description) room.description = description
         if (specialKeys) room.specialKeys = specialKeys
+        if (options) room.options = options
 
         // データベースの更新
         const query = `
         UPDATE rooms
-        SET name = $2, description = $3, special_keys = $4
+        SET name = $2, description = $3, special_keys = $4, options = $5
         WHERE id = $1
       `
-        const values = [roomId, room.name, room.description, room.specialKeys]
+        const values = [
+          roomId,
+          room.name,
+          room.description,
+          room.specialKeys,
+          room.options
+        ]
         await db.query(query, values)
 
         res
