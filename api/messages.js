@@ -131,7 +131,7 @@ const loadRoomInfoFromDB = async roomId => {
     }
     const row = result.rows[0]
     const room = {
-      lastUpdated: row.last_update,
+      lastUpdated: Date.parse(row.last_update),
       name: row.name,
       description: row.description,
       password: row.password,
@@ -584,7 +584,7 @@ module.exports = async (req, res) => {
     const user = users.find(user => user.ip === ip)
     if (room.options.private && !user) {
       res.status(204).end()
-    } else if (true) {
+    } else if (room.lastUpdated > clientLastUpdated) {
       // todo: 更新があったときだけ送信する
       const messages = await loadMessagesFromDB(roomId)
       res.status(200).json({
