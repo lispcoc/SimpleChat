@@ -137,6 +137,7 @@
       <div id="chatContainer" style="display: flex; height: 100%">
         <!-- メッセージ欄 -->
         <div id="messageSection">
+          <div id="progress"></div>
           <div id="messages"></div>
         </div>
       </div>
@@ -146,6 +147,7 @@
     <script>
       const API_URL = '/api/messages'
       const messagesDiv = document.getElementById('messages')
+      const progressDiv = document.getElementById('progress')
       const inputDiv = document.getElementById('inputDiv')
       const messageInput = document.getElementById('messageInput')
       const sendButton = document.getElementById('sendButton')
@@ -206,6 +208,7 @@
             lastUpdated: lastUpdated,
             roomId: roomId
           })
+          progressDiv.innerText = '更新中...'
           const response = await fetch(`${API_URL}?${params.toString()}`)
           if (response.status === 200) {
             const data = await response.json()
@@ -252,6 +255,7 @@
         } catch (error) {
           console.error('Error fetching messages:', error)
         }
+        progressDiv.innerText = ''
       }
 
       // 入室
