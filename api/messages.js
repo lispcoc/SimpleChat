@@ -2,23 +2,30 @@ const bcrypt = require('bcryptjs')
 const Dice = ({ Base, Version } = require('bcdice'))
 const db = require('./db')
 
-let lastUpdated = Date.now()
-let rooms = {}
-let roomLoadHandle
-let loadCount = 0
-let roomDataLoaded = false
-let roomDataLoading = false
-let roomMessageLoaded = false
-let roomMessageLoading = false
-let flushingMessages = false
 let currentRoomId = 0
 let roomCreateCount = {}
-const messageBuffer = {} // メッセージを一時的に保存するバッファ
-const BATCH_SIZE = 1 // バッチ書き込みのサイズ
-const BATCH_INTERVAL = 60 * 60 * 1000 // バッチ書き込みの間隔（ミリ秒）
+
 const MAX_MESSAGES_PER_TABLE = 100 // 各テーブルの最大メッセージ数
 const ROOM_CREATE_INTERVAL = 7 * 24 * 60 * 60 * 1000
 const MAX_ROOMS = 1000
+
+const getRoomList = async () => {
+  try {
+    const query = `SELECT id, name, description, password, special_keys, options FROM rooms`
+    const result = await db.query(query)
+    if (!result.rows || !result.rows[0]) {
+      res.status(400).json({ error: 'ルームリストが取得できませんでした。' })
+      return
+    }
+    const roomList = result.rows.map(row => {
+      return { id: row.id, name: row.name }
+    })
+    return roomList
+  } catch (error) {
+    console.error(`Error getRoomList:`, error)
+  }
+  return null
+}
 
 const createMessageTable = async roomId => {
   const tableName = `messages_${roomId}`
@@ -212,19 +219,13 @@ module.exports = async (req, res) => {
   const mode = req.query.mode
 
   if (req.method === 'GET' && mode === 'stats') {
-    res.status(200).json({
-      loadCount: loadCount,
-      flushingMessages: flushingMessages,
-      roomDataLoaded: roomDataLoaded,
-      roomDataLoading: roomDataLoading,
-      roomMessageLoaded: roomMessageLoaded,
-      roomMessageLoading: roomMessageLoading
-    })
+    res.status(200).json({})
     return
   }
 
   if (req.method === 'POST' && mode === 'createRoom') {
-    if (Object.keys(rooms).length > MAX_ROOMS) {
+    const roomList = await getRoomList()
+    if (roomList.length > MAX_ROOMS) {
       res.status(400).json({
         error:
           '部屋数が上限に到達しています。新規受付けの再開をお待ちください。'
@@ -284,19 +285,9 @@ module.exports = async (req, res) => {
           JSON.stringify(options)
         ]
         const result = await db.query(query, values)
-        rooms[id] = {
-          messages: [],
-          users: {},
-          lastUpdated: Date.now(),
-          name,
-          description,
-          password: hashedPassword,
-          specialKeys,
-          options
-        }
         roomCreateCount[ip] = Date.now()
-
         await createMessageTable(id)
+        await createUserTable(id)
 
         res.status(201).json({
           success: true,
@@ -372,15 +363,7 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET' && mode === 'roomList') {
-    const query = `SELECT id, name, description, password, special_keys, options FROM rooms`
-    const result = await db.query(query)
-    if (!result.rows || !result.rows[0]) {
-      res.status(400).json({ error: 'ルームリストが取得できませんでした。' })
-      return
-    }
-    const roomList = result.rows.map(row => {
-      return { id: row.id, name: row.name }
-    })
+    const roomList = await getRoomList()
     res.status(200).json(roomList)
     return
   }
