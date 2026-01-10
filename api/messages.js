@@ -127,6 +127,7 @@ const loadRoomsFromDB = async () => {
       if (row.id > currentRoomId) {
         currentRoomId = row.id
       }
+      loadMessagesFromDB(row.id)
     })
 
     roomDataLoaded = true
@@ -135,34 +136,31 @@ const loadRoomsFromDB = async () => {
     console.error('Error loading rooms from database:', error)
   } finally {
   }
-  loadMessagesFromDB()
 }
 
-const loadMessagesFromDB = async () => {
-  if (roomDataLoaded) {
+const loadMessagesFromDB = async roomId => {
+  if (roomDataLoaded && !rooms[roomId].roomMessageLoaded) {
     try {
-      Object.keys(rooms).forEach(roomId => {
-        const tableName = `messages_${roomId}`
-        const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
-        db.query(messageQuery).then(messageResults => {
-          if (messageResults.rows) {
-            messageResults.rows.forEach(row => {
-              addMessage(
-                roomId,
-                {
-                  text: row.text,
-                  color: row.color,
-                  timestamp: row.timestamp,
-                  username: row.username,
-                  system: row.system
-                },
-                false
-              )
-            })
-          }
-        })
+      const tableName = `messages_${roomId}`
+      const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
+      db.query(messageQuery).then(messageResults => {
+        if (messageResults.rows) {
+          messageResults.rows.forEach(row => {
+            addMessage(
+              roomId,
+              {
+                text: row.text,
+                color: row.color,
+                timestamp: row.timestamp,
+                username: row.username,
+                system: row.system
+              },
+              false
+            )
+          })
+        }
       })
-      roomMessageLoaded = true
+      rooms[roomId].roomMessageLoaded = true
     } catch (error) {
       console.error('Error loading messages from database:', error)
     } finally {
@@ -454,13 +452,24 @@ module.exports = async (req, res) => {
   }
 
   if (!roomId) {
-    res.status(400).json({ error: 'roomId is required' })
+    res.status(400).json({ error: '部屋IDの指定が不正です。' })
     return
   }
 
   const room = await getRoom(roomId)
   if (room == null) {
-    res.status(400).json({ error: 'Room is not exist' })
+    res.status(400).json({ error: '部屋が存在しません。' })
+    return
+  }
+
+  if (!room.roomMessageLoaded) {
+    await loadMessagesFromDB(roomId)
+  }
+
+  if (!room.roomMessageLoaded) {
+    res
+      .status(400)
+      .json({ error: '部屋データの準備中です。しばらくお待ちください。' })
     return
   }
 
