@@ -40,7 +40,7 @@ const flushMessagesToDB = async roomId => {
   await createMessageTable(roomId) // テーブルが存在しない場合は作成
 
   const messagesToSave = messageBuffer[roomId]
-  let placeholders = ""
+  let placeholders = ''
 
   try {
     // INSERT クエリをバッチ形式で構築
