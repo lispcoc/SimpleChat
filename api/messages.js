@@ -120,7 +120,7 @@ module.exports = async (req, res) => {
           description,
           hashedPassword,
           JSON.stringify(specialKeys),
-          options
+          JSON.stringify(options)
         ]
         const result = await db.query(query, values)
         rooms[id] = {
@@ -192,8 +192,8 @@ module.exports = async (req, res) => {
           roomId,
           room.name,
           room.description,
-          room.specialKeys,
-          room.options
+          JSON.stringify(room.specialKeys),
+          JSON.stringify(room.options)
         ]
         await db.query(query, values)
 
