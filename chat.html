@@ -393,7 +393,7 @@
       }
 
       // メッセージを定期的に取得
-      function pollMessages(interval = 5000) {
+      function pollMessages(interval = 15 * 1000) {
         setInterval(fetchMessages, interval) // 指定した間隔で fetchMessages を呼び出す
       }
 
