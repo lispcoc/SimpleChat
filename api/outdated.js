@@ -16,7 +16,7 @@ let roomCreateCount = {}
 const messageBuffer = {} // メッセージを一時的に保存するバッファ
 const BATCH_SIZE = 1 // バッチ書き込みのサイズ
 const BATCH_INTERVAL = 60 * 60 * 1000 // バッチ書き込みの間隔（ミリ秒）
-const MAX_MESSAGES_PER_TABLE = 100 // 各テーブルの最大メッセージ数
+const MAX_MESSAGES_PER_TABLE = 1000 // 各テーブルの最大メッセージ数
 const ROOM_CREATE_INTERVAL = 7 * 24 * 60 * 60 * 1000
 const MAX_ROOMS = 1000
 
@@ -39,170 +39,181 @@ const createMessageTable = async roomId => {
   }
 }
 
-const createUserTable = async roomId => {
-  const tableName = `users_${roomId}`
-  const query = `
-    CREATE TABLE IF NOT EXISTS ${tableName} (
-      username VARCHAR(255),
-      color INTEGER DEFAULT 0,
-      lastactivity TIMESTAMP NOT NULL,
-      ip TEXT NOT NULL,
-    );
-  `
-  try {
-    await db.query(query)
-    console.log(`Table ${tableName} created or already exists.`)
-  } catch (error) {
-    console.error(`Error creating table ${tableName}:`, error)
+// メッセージをデータベースに書き込む関数
+const flushMessagesToDB = async roomId => {
+  if (flushingMessages) {
+    return
   }
-}
-
-const addUser = async (roomId, user) => {
-  const tableName = `users_${roomId}`
-  const query = `
-      INSERT INTO ${tableName} (username, color, lastactivity, ip)
-      VALUES ($1, $2, $3, $4);
-    `
-  try {
-    await createUserTable(roomId)
-    const values = [
-      user.username,
-      0, // color のデフォルト値
-      new Date(Date.now()).toISOString(),
-      user.ip
-    ]
-    await db.query(query, values)
-  } catch (error) {
-    console.error(`Error creating table ${tableName}:`, error)
+  if (!messageBuffer[roomId] || messageBuffer[roomId].length === 0) {
+    return
   }
-}
+  flushingMessages = true
 
-const getUsers = async roomId => {
-  const tableName = `users_${roomId}`
+  const tableName = `messages_${roomId}`
+  await createMessageTable(roomId) // テーブルが存在しない場合は作成
 
-  try {
-    await createUserTable(roomId)
-    const query = `SELECT username, color, lastactivity, ip FROM ${tableName}`
-    const result = await db.query(query)
-
-    if (!result.rows || !result.rows[0]) {
-      return null
-    }
-
-    result.rows.map(row => ({
-      username: row.username,
-      color: row.color,
-      lastactivity: row.lastactivity,
-      ip: row.ip
-    }))
-  } catch (error) {
-    console.error('Error loading rooms from database:', error)
-  }
-  return null
-}
-
-const deleteUser = async (roomId, user) => {
-  const tableName = `users_${roomId}`
+  const messagesToSave = messageBuffer[roomId]
+  let placeholders = ''
 
   try {
-    await createUserTable(roomId)
-    const query = `DELETE FROM ${tableName} WHERE ip = ${user.ip}`
-    const result = await db.query(query)
-  } catch (error) {
-    console.error('Error loading rooms from database:', error)
-  }
-}
-
-// データベースからルーム情報をロード
-const loadRoomInfoFromDB = async roomId => {
-  try {
-    const query = `SELECT id, name, description, password, special_keys, options FROM rooms WHERE id = ${roomId}`
-    const result = await db.query(query)
-
-    if (!result.rows || !result.rows[0]) {
-      return null
-    }
-    const row = result.rows[0]
-    const room = {
-      lastUpdated: Date.now(),
-      name: row.name,
-      description: row.description,
-      password: row.password,
-      specialKeys: row.special_keys ? row.special_keys : {},
-      options: row.options ? row.options : {}
-    }
-    return room
-  } catch (error) {
-    console.error('Error loading rooms from database:', error)
-  }
-  return null
-}
-
-const loadMessagesFromDB = async roomId => {
-  try {
-    const tableName = `messages_${roomId}`
-    const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
-    const result = await db.query(messageQuery)
-
-    if (!result.rows || !result.rows[0]) {
-      return null
-    }
-
-    const messages = result.rows.map(row => ({
-      text: row.text,
-      color: row.color,
-      timestamp: row.timestamp,
-      username: row.username,
-      system: row.system
-    }))
-    return messages
-  } catch (error) {
-    console.error('Error loading messages from database:', error)
-  }
-  return null
-}
-
-const getRoom = async roomId => {
-  return await loadRoomInfoFromDB()
-}
-
-const addMessage = async (roomId, msg) => {
-  try {
-    const tableName = `messages_${roomId}`
-    await createMessageTable(roomId)
+    // INSERT クエリをバッチ形式で構築
+    const values = []
+    placeholders = messagesToSave
+      .map((msg, index) => {
+        const baseIndex = index * 5 // 1メッセージあたり5つの値
+        values.push(
+          msg.text,
+          0, // color のデフォルト値
+          new Date(msg.timestamp).toISOString(),
+          msg.username || 'Unknown',
+          msg.system || false
+        )
+        return `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${
+          baseIndex + 4
+        }, $${baseIndex + 5})`
+      })
+      .join(', ')
 
     const query = `
       INSERT INTO ${tableName} (text, color, timestamp, username, system)
-      VALUES ($1, $2, $3, $4, $5);
+      VALUES ${placeholders};
     `
-    const values = [
-      msg.text,
-      0, // color のデフォルト値
-      new Date(msg.timestamp).toISOString(),
-      msg.username || 'Unknown',
-      msg.system || false
-    ]
+
+    // クエリを実行
     await db.query(query, values)
+    console.log(
+      `Flushed ${messagesToSave.length} messages to DB for room ${roomId}`
+    )
+
+    messageBuffer[roomId] = [] // バッファをクリア
 
     // レコード数をチェックして古いものを削除
     const deleteQuery = `
-          DELETE FROM ${tableName}
-          WHERE ctid IN (
-            SELECT ctid
-            FROM ${tableName}
-            ORDER BY timestamp ASC
-            LIMIT (
-              SELECT COUNT(*) - $1
-              FROM ${tableName}
-            )
-          );
-        `
+      DELETE FROM ${tableName}
+      WHERE ctid IN (
+        SELECT ctid
+        FROM ${tableName}
+        ORDER BY timestamp ASC
+        LIMIT (
+          SELECT COUNT(*) - $1
+          FROM ${tableName}
+        )
+      );
+    `
     await db.query(deleteQuery, [MAX_MESSAGES_PER_TABLE])
     console.log(
       `Deleted old messages from ${tableName} to maintain the limit of ${MAX_MESSAGES_PER_TABLE}`
     )
-  } catch {
-    console.error('Error addMessage:', error)
+  } catch (error) {
+    console.error('Error flushing messages to DB:', error, placeholders)
+  }
+  flushingMessages = false
+}
+
+// データベースからルーム情報をロード
+const loadRoomsFromDB = async () => {
+  try {
+    const query =
+      'SELECT id, name, description, password, special_keys, options FROM rooms'
+    const result = await db.query(query)
+
+    result.rows.forEach(row => {
+      rooms[row.id] = {
+        messages: [],
+        users: {},
+        lastUpdated: Date.now(),
+        name: row.name,
+        description: row.description,
+        password: row.password,
+        specialKeys: row.special_keys ? row.special_keys : {},
+        options: row.options ? row.options : {}
+      }
+
+      // 現在の最大ルームIDを更新
+      if (row.id > currentRoomId) {
+        currentRoomId = row.id
+      }
+      loadMessagesFromDB(row.id)
+    })
+
+    roomDataLoaded = true
+    console.log('Rooms loaded from database:', rooms)
+  } catch (error) {
+    console.error('Error loading rooms from database:', error)
+  } finally {
+  }
+}
+
+const loadMessagesFromDB = async roomId => {
+  if (roomDataLoaded && !rooms[roomId].roomMessageLoaded) {
+    try {
+      const tableName = `messages_${roomId}`
+      const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
+      db.query(messageQuery).then(messageResults => {
+        if (messageResults.rows) {
+          messageResults.rows.forEach(row => {
+            addMessage(
+              roomId,
+              {
+                text: row.text,
+                color: row.color,
+                timestamp: row.timestamp,
+                username: row.username,
+                system: row.system
+              },
+              false
+            )
+          })
+        }
+      })
+      rooms[roomId].roomMessageLoaded = true
+    } catch (error) {
+      console.error('Error loading messages from database:', error)
+    } finally {
+    }
+  }
+}
+
+const getRoom = async roomId => {
+  if (!roomDataLoaded) {
+    await loadRoomsFromDB()
+  }
+  return rooms[roomId]
+}
+
+const addMessage = async (roomId, msg, addDBBuffer = true) => {
+  const room = await getRoom(roomId)
+  room.messages.push(msg)
+  room.lastUpdated = Date.now()
+
+  if (room.messages.length > 100) {
+    room.messages.shift()
+  }
+
+  if (addDBBuffer) {
+    // バッファにメッセージを追加
+    if (!messageBuffer[roomId]) {
+      messageBuffer[roomId] = []
+    }
+    messageBuffer[roomId].push(msg)
+
+    // バッファが一定サイズに達したらフラッシュ
+    if (messageBuffer[roomId].length >= BATCH_SIZE) {
+      await flushMessagesToDB(roomId)
+    }
+  }
+}
+
+const loadRooms = async () => {
+  loadCount++
+  if (!roomDataLoaded) {
+    loadRoomsFromDB()
+  }
+  if (!roomMessageLoaded) {
+    loadMessagesFromDB()
+  }
+  if (roomDataLoaded && roomMessageLoaded) {
+    clearInterval(roomLoadHandle)
   }
 }
 
@@ -372,14 +383,12 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET' && mode === 'roomList') {
-    const query = `SELECT id, name, description, password, special_keys, options FROM rooms`
-    const result = await db.query(query)
-    if (!result.rows || !result.rows[0]) {
-      res.status(400).json({ error: 'ルームリストが取得できませんでした。' })
-      return
+    if (!roomDataLoaded) {
+      await loadRoomsFromDB()
     }
-    const roomList = result.rows.map(row => {
-      return { id: row.id, name: row.name }
+
+    const roomList = Object.entries(rooms).map(([id, roomData]) => {
+      return { id: id, name: roomData.name }
     })
     res.status(200).json(roomList)
     return
@@ -392,7 +401,7 @@ module.exports = async (req, res) => {
       return
     }
 
-    const room = await loadRoomInfoFromDB(roomId)
+    const room = await getRoom(roomId)
     if (room == null) {
       res.status(400).json({ error: 'Room is not exist' })
       return
@@ -421,7 +430,7 @@ module.exports = async (req, res) => {
           return
         }
 
-        const room = await loadRoomInfoFromDB(roomId)
+        const room = await getRoom(roomId)
         if (!room) {
           res.status(404).json({ error: 'Room not found.' })
           return
@@ -453,9 +462,20 @@ module.exports = async (req, res) => {
     return
   }
 
-  const room = await loadRoomInfoFromDB(roomId)
+  const room = await getRoom(roomId)
   if (room == null) {
     res.status(400).json({ error: '部屋が存在しません。' })
+    return
+  }
+
+  if (!room.roomMessageLoaded) {
+    await loadMessagesFromDB(roomId)
+  }
+
+  if (!room.roomMessageLoaded) {
+    res
+      .status(400)
+      .json({ error: '部屋データの準備中です。しばらくお待ちください。' })
     return
   }
 
@@ -471,14 +491,13 @@ module.exports = async (req, res) => {
         const { action, text, username } = parsedBody
 
         if (action === 'enter') {
-          const users = getUsers(roomId)
           const usersLimit = room.options.usersLimit || 10
-          if (users.length >= usersLimit) {
+          if (Object.keys(room.users).length >= usersLimit) {
             res.status(400).json({ error: 'これ以上入室できません' })
             return
           }
 
-          if (users.find(user => user.ip === ip)) {
+          if (room.users[ip]) {
             res.status(200).json({ success: true, message: '既に入室済みです' })
             return
           }
@@ -493,40 +512,34 @@ module.exports = async (req, res) => {
             return
           }
 
-          addUser(roomId, {
-            username: username,
-            color: 0,
-            lastactivity: Date.now(),
-            ip: ip
-          })
+          room.users[ip] = {
+            username: username.trim(),
+            lastActivity: Date.now() // 最終アクティビティを記録
+          }
 
           addMessage(roomId, {
             text: `${username} さんが入室しました。`,
             timestamp: Date.now(),
             system: true
           })
+          lastUpdated = Date.now() // 更新タイムスタンプを更新
 
           res.status(200).json({ success: true, message: 'Entered the room' })
         } else if (action === 'leave') {
           // 退室処理
-          const users = getUsers(roomId)
-          const user = users.find(user => user.ip === ip)
-          if (user) {
-            addMessage(roomId, {
-              text: `${user.username || ip} さんが退室しました。`,
-              timestamp: Date.now(),
-              system: true
-            })
-            deleteUser(roomId, {
-              ip: ip
-            })
-          }
+          const username = room.users[ip].username
+          delete room.users[ip]
+          addMessage(roomId, {
+            text: `${username || ip} さんが退室しました。`,
+            timestamp: Date.now(),
+            system: true
+          })
+          lastUpdated = Date.now() // 更新タイムスタンプを更新
+
           res.status(200).json({ success: true, message: 'Left the room' })
         } else if (action === 'message') {
           // 入室しているか確認
-          const users = getUsers(roomId)
-          const user = users.find(user => user.ip === ip)
-          if (!user) {
+          if (!room.users[ip]) {
             res.status(403).json({
               error: 'You must enter the room before sending messages.'
             })
@@ -547,7 +560,7 @@ module.exports = async (req, res) => {
           const message = {
             text,
             timestamp: Date.now(),
-            username: user.username
+            username: room.users[ip].username
           }
           addMessage(roomId, message)
 
@@ -573,7 +586,8 @@ module.exports = async (req, res) => {
               addMessage(roomId, message)
             }
           }
-          // todo: lastactivityを更新
+          room.users[ip].lastActivity = Date.now()
+          lastUpdated = Date.now() // 更新タイムスタンプを更新
 
           res.status(201).json({ success: true })
         } else {
@@ -588,18 +602,16 @@ module.exports = async (req, res) => {
     const clientIp =
       req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
-    const users = getUsers(roomId)
-    const user = users.find(user => user.ip === ip)
-    if (room.options.private && !user) {
+    if (room.options.private && !room.users[clientIp]) {
       res.status(204).end()
-    } else if (true) {
-      // todo: 更新があったときだけ送信する
-      const messages = await loadMessagesFromDB(roomId)
+    } else if (clientLastUpdated < lastUpdated) {
       res.status(200).json({
-        messages: messages.slice(-20),
-        users: users,
+        messages: room.messages.slice(-20),
+        users: Object.entries(room.users).map(([ip, user]) => {
+          return { ip: ip, username: user.username }
+        }),
         clientIp,
-        lastUpdated: Date.now()
+        lastUpdated: room.lastUpdated
       })
     } else {
       res.status(204).end() // 更新がない場合は 204 No Content を返す
@@ -608,3 +620,30 @@ module.exports = async (req, res) => {
     res.status(405).json({ error: 'Method not allowed' })
   }
 }
+
+// 非アクティブなユーザーをチェックして退室
+setInterval(() => {
+  const now = Date.now()
+  const INACTIVITY_LIMIT = 20 * 60 * 1000 // 20分（ミリ秒）
+
+  Object.keys(rooms).forEach(roomId => {
+    const room = rooms[roomId]
+    Object.entries(room.users).forEach(([ip, user]) => {
+      if (now - user.lastActivity > INACTIVITY_LIMIT) {
+        // ユーザーを退室させる
+        addMessage(roomId, {
+          text: `${user.username || ip} さんが非アクティブのため退室しました。`,
+          timestamp: now,
+          system: true
+        })
+        delete room.users[ip] // ユーザーを削除
+        lastUpdated = now // 更新タイムスタンプを更新
+      }
+    })
+  })
+}, 60 * 1000) // 1分ごとにチェック
+
+// 定期的にバッファをフラッシュする
+setInterval(() => {
+  Object.keys(messageBuffer).forEach(roomId => flushMessagesToDB(roomId))
+}, BATCH_INTERVAL)
