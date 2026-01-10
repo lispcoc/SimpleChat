@@ -5,6 +5,7 @@ const db = require('./db')
 let lastUpdated = Date.now()
 let rooms = {}
 let roomLoadHandle
+let loadCount = 0
 let roomDataLoaded = false
 let roomDataLoading = false
 let roomMessageLoaded = false
@@ -212,6 +213,18 @@ module.exports = async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
   const roomId = req.query.roomId // URL パラメータから roomId を取得
   const mode = req.query.mode
+
+  if (req.method === 'GET' && mode === 'stats') {
+    res.status(200).json({
+      loadCount: loadCount,
+      rooms: rooms,
+      roomDataLoaded: roomDataLoaded,
+      roomDataLoading: roomDataLoading,
+      roomMessageLoaded: roomMessageLoaded,
+      roomMessageLoading: roomMessageLoading
+    })
+    return
+  }
 
   if (!roomDataLoaded || !roomMessageLoaded) {
     res
@@ -623,7 +636,8 @@ setInterval(() => {
   Object.keys(messageBuffer).forEach(roomId => flushMessagesToDB(roomId))
 }, BATCH_INTERVAL)
 
-roomLoadHandle = setInterval(() => {
+const loadRooms = () => {
+  loadCount++
   if (!roomDataLoaded) {
     loadRoomsFromDB()
   }
@@ -633,4 +647,8 @@ roomLoadHandle = setInterval(() => {
   if (roomDataLoaded && roomMessageLoaded) {
     clearInterval(roomLoadHandle)
   }
-}, 60 * 1000)
+}
+
+roomLoadHandle = setInterval(loadRooms, 60 * 1000)
+
+loadRooms()
