@@ -120,12 +120,18 @@ const loadRoomsFromDB = async () => {
       if (row.id > currentRoomId) {
         currentRoomId = row.id
       }
+    })
 
-      const roomId = row.id
-      const tableName = `messages_${roomId}`
-      createMessageTable(roomId)
-      const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
-      const messageResults = db.query(messageQuery)
+    roomDataLoaded = true
+    console.log('Rooms loaded from database:', rooms)
+  } catch (error) {
+    console.error('Error loading rooms from database:', error)
+  }
+
+  Object.keys(rooms).forEach(roomId => {
+    const tableName = `messages_${roomId}`
+    const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
+    db.query(messageQuery).then(messageResults => {
       if (messageResults.rows) {
         messageResults.rows.forEach(row => {
           addMessage(
@@ -142,12 +148,7 @@ const loadRoomsFromDB = async () => {
         })
       }
     })
-
-    roomDataLoaded = true
-    console.log('Rooms loaded from database:', rooms)
-  } catch (error) {
-    console.error('Error loading rooms from database:', error)
-  }
+  })
 }
 
 const getRoom = async roomId => {
