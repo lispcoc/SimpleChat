@@ -170,7 +170,7 @@ const loadMessagesFromDB = async roomId => {
 }
 
 const getRoom = async roomId => {
-  return await loadRoomInfoFromDB()
+  return await loadRoomInfoFromDB(roomId)
 }
 
 const addMessage = async (roomId, msg) => {
@@ -571,7 +571,7 @@ module.exports = async (req, res) => {
     const clientIp =
       req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
-    const users = getUsers(roomId)
+    const users = await getUsers(roomId)
     const user = users.find(user => user.ip === ip)
     if (room.options.private && !user) {
       res.status(204).end()
