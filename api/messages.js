@@ -11,7 +11,7 @@ const MAX_ROOMS = 1000
 
 const getRoomList = async () => {
   try {
-    const query = `SELECT id, name, description, password, special_keys, options FROM rooms`
+    const query = `SELECT id, name FROM rooms`
     const result = await db.query(query)
     if (!result.rows || !result.rows[0]) {
       return []
@@ -113,7 +113,7 @@ const deleteUser = async (roomId, user) => {
 
   try {
     await createUserTable(roomId)
-    const query = `DELETE FROM ${tableName} WHERE ip = ${user.ip}`
+    const query = `DELETE FROM ${tableName} WHERE ip = '${user.ip}'`
     const result = await db.query(query)
   } catch (error) {
     console.error('Error loading rooms from database:', error)
@@ -123,7 +123,7 @@ const deleteUser = async (roomId, user) => {
 // データベースからルーム情報をロード
 const loadRoomInfoFromDB = async roomId => {
   try {
-    const query = `SELECT id, name, description, password, special_keys, options FROM rooms WHERE id = ${roomId}`
+    const query = `SELECT id, name, description, password, special_keys, options, last_update FROM rooms WHERE id = ${roomId}`
     const result = await db.query(query)
 
     if (!result.rows || !result.rows[0]) {
@@ -131,7 +131,7 @@ const loadRoomInfoFromDB = async roomId => {
     }
     const row = result.rows[0]
     const room = {
-      lastUpdated: Date.now(),
+      lastUpdated: row.last_update,
       name: row.name,
       description: row.description,
       password: row.password,
@@ -198,7 +198,7 @@ const addMessage = async (roomId, msg) => {
       WHERE id = $1
     `
     const valuesRoom = [roomId, new Date(msg.timestamp).toISOString()]
-    await db.query(query, valuesRoom)
+    await db.query(queryRoom, valuesRoom)
 
     // レコード数をチェックして古いものを削除
     const deleteQuery = `
@@ -453,10 +453,7 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    let users = await getUsers(roomId)
-    if (users == null) {
-      users = []
-    }
+    const users = await getUsers(roomId)
     let body = ''
     req.on('data', chunk => {
       body += chunk.toString()
@@ -594,7 +591,7 @@ module.exports = async (req, res) => {
         messages: messages.slice(-20),
         users: users || [],
         clientIp,
-        lastUpdated: Date.now()
+        lastUpdated: room.lastUpdated
       })
     } else {
       res.status(204).end() // 更新がない場合は 204 No Content を返す
