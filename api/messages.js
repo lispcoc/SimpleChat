@@ -191,6 +191,15 @@ const addMessage = async (roomId, msg) => {
     ]
     await db.query(query, values)
 
+    // 最終更新時間
+    const queryRoom = `
+      UPDATE rooms
+      SET last_update = $2
+      WHERE id = $1
+    `
+    const valuesRoom = [roomId, new Date(msg.timestamp).toISOString()]
+    await db.query(query, valuesRoom)
+
     // レコード数をチェックして古いものを削除
     const deleteQuery = `
           DELETE FROM ${tableName}
@@ -444,7 +453,7 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    let users = getUsers(roomId)
+    let users = await getUsers(roomId)
     if (users == null) {
       users = []
     }
