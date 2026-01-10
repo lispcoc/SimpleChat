@@ -165,15 +165,17 @@ const addMessage = async (roomId, msg, addDBBuffer = true) => {
     room.messages.shift()
   }
 
-  // バッファにメッセージを追加
-  if (!messageBuffer[roomId]) {
-    messageBuffer[roomId] = []
-  }
-  messageBuffer[roomId].push(msg)
+  if (addDBBuffer) {
+    // バッファにメッセージを追加
+    if (!messageBuffer[roomId]) {
+      messageBuffer[roomId] = []
+    }
+    messageBuffer[roomId].push(msg)
 
-  // バッファが一定サイズに達したらフラッシュ
-  if (messageBuffer[roomId].length >= BATCH_SIZE) {
-    await flushMessagesToDB(roomId)
+    // バッファが一定サイズに達したらフラッシュ
+    if (messageBuffer[roomId].length >= BATCH_SIZE) {
+      await flushMessagesToDB(roomId)
+    }
   }
 }
 
