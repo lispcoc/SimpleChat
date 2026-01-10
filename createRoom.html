@@ -67,6 +67,12 @@
           required
         ></textarea>
 
+        <label for="roomOptionPrivate">未入室者のログ確認</label>
+        <select name="roomOptionPrivate" id="roomOptionPrivate">
+          <option value="true">許可する</option>
+          <option value="false">許可しない</option>
+        </select>
+
         <label for="roomPassword">パスワード (必須)</label>
         <input
           type="password"
@@ -123,7 +129,12 @@
           roomSpecialKeys[roomSpecialKey_1] = roomSpecialText_1
         }
 
-        let roomOptions = {}
+        const roomOptionPrivate =
+          document.getElementById('roomOptionPrivate').value.trim() === 'true'
+
+        let roomOptions = {
+          private: roomOptionPrivate
+        }
 
         if (!roomName || !roomDescription || !roomPassword) {
           alert('All fields are required.')

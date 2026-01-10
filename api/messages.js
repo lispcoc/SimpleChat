@@ -12,7 +12,7 @@ let roomCreateCount = {}
 const loadRoomsFromDB = async () => {
   try {
     const query =
-      'SELECT id, name, description, password, special_keys FROM rooms'
+      'SELECT id, name, description, password, special_keys, options FROM rooms'
     const result = await db.query(query)
 
     result.rows.forEach(row => {
@@ -23,7 +23,8 @@ const loadRoomsFromDB = async () => {
         name: row.name,
         description: row.description,
         password: row.password,
-        specialKeys: row.special_keys ? row.special_keys : {}
+        specialKeys: row.special_keys ? row.special_keys : {},
+        options: row.options ? row.options : {}
       }
 
       // 現在の最大ルームIDを更新

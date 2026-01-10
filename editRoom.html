@@ -180,9 +180,20 @@
             }
             console.log(key)
             roomSpecialKeyList[i].value = key
-            roomSpecialTextList[i].value = data.specialKeys[key]
+            roomSpecialTextList[i].value = data.specialKeys[key].join('\n')
             i++
           }
+
+          document
+            .getElementById('roomOptionPrivate')
+            .options.forEach(option => {
+              if (data.options.private && option.value === 'true') {
+                option.selected = true
+              }
+              if (!data.options.private && option.value === 'false') {
+                option.selected = true
+              }
+            })
 
           loginForm.style.display = 'none'
           editForm.style.display = 'block'
