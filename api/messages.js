@@ -120,6 +120,22 @@ const loadRoomsFromDB = async () => {
       if (row.id > currentRoomId) {
         currentRoomId = row.id
       }
+
+      const roomId = row.id
+      const tableName = `messages_${roomId}`
+      const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
+      const result = db.query(query)
+      if (result.rows) {
+        result.rows.forEach(row => {
+          addMessage(roomId, {
+            text: row.text,
+            color: row.color,
+            timestamp: row.timestamp,
+            username: row.username,
+            system: row.system
+          })
+        })
+      }
     })
 
     roomDataLoaded = true
