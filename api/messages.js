@@ -40,11 +40,12 @@ const flushMessagesToDB = async roomId => {
   await createMessageTable(roomId) // テーブルが存在しない場合は作成
 
   const messagesToSave = messageBuffer[roomId]
+  let placeholders = ""
 
   try {
     // INSERT クエリをバッチ形式で構築
     const values = []
-    const placeholders = messagesToSave
+    placeholders = messagesToSave
       .map((msg, index) => {
         const baseIndex = index * 5 // 1メッセージあたり5つの値
         values.push(
@@ -73,7 +74,7 @@ const flushMessagesToDB = async roomId => {
 
     messageBuffer[roomId] = [] // バッファをクリア
   } catch (error) {
-    console.error('Error flushing messages to DB:', error)
+    console.error('Error flushing messages to DB:', error, placeholders)
   }
 }
 
@@ -133,7 +134,7 @@ const addMessage = async (roomId, msg) => {
 
   // バッファが一定サイズに達したらフラッシュ
   if (messageBuffer[roomId].length >= BATCH_SIZE) {
-    flushMessagesToDB(roomId)
+    await flushMessagesToDB(roomId)
   }
 }
 
