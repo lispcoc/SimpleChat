@@ -123,6 +123,8 @@
           roomSpecialKeys[roomSpecialKey_1] = roomSpecialText_1
         }
 
+        let roomOptions = {}
+
         if (!roomName || !roomDescription || !roomPassword) {
           alert('All fields are required.')
           return
@@ -142,7 +144,7 @@
               description: roomDescription,
               password: roomPassword,
               specialKeys: roomSpecialKeys,
-              options: {}
+              options: roomOptions
             })
           })
 

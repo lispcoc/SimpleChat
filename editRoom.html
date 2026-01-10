@@ -213,6 +213,8 @@
         roomSpecialKeys[roomSpecialKey_1] = roomSpecialText_1
       }
 
+      let roomOptions = {}
+
       if (!roomId) {
         alert('ルームIDが不正です。')
         return
@@ -239,7 +241,7 @@
             description: roomDescription,
             password: roomPassword,
             specialKeys: roomSpecialKeys,
-            options: {}
+            options: roomOptions
           })
         })
 
