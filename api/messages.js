@@ -11,6 +11,8 @@ const messageBuffer = {} // メッセージを一時的に保存するバッフ�
 const BATCH_SIZE = 10 // バッチ書き込みのサイズ
 const BATCH_INTERVAL = 60 * 60 * 1000 // バッチ書き込みの間隔（ミリ秒）
 const MAX_MESSAGES_PER_TABLE = 1000 // 各テーブルの最大メッセージ数
+const ROOM_CREATE_INTERVAL = 7 * 24 * 60 * 60 * 1000
+const MAX_ROOMS = 1000
 
 const createMessageTable = async roomId => {
   const tableName = `messages_${roomId}`
@@ -193,8 +195,6 @@ module.exports = async (req, res) => {
   const mode = req.query.mode
 
   if (req.method === 'POST' && mode === 'createRoom') {
-    const ROOM_CREATE_INTERVAL = 7 * 24 * 60 * 60 * 1000
-    const MAX_ROOMS = 1000
     if (Object.keys(rooms).length > MAX_ROOMS) {
       res.status(400).json({
         error:
@@ -351,6 +351,7 @@ module.exports = async (req, res) => {
       return { id: id, name: roomData.name }
     })
     res.status(200).json(roomList)
+    return
   }
 
   if (req.method === 'GET' && mode === 'roomInfo') {
