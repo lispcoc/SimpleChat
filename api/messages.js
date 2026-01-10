@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const Dice = ({ Base, Version } = require('bcdice'))
 const db = require('./db')
 
 let lastUpdated = Date.now()
@@ -383,6 +384,16 @@ module.exports = async (req, res) => {
               system: true
             }
             addMessage(roomId, message)
+          } else {
+            const result = Dice.Base.eval(text)
+            if (result && result.text) {
+              const message = {
+                text: `ダイスロール (${text}): ${result.text}`,
+                timestamp: Date.now(),
+                system: true
+              }
+              addMessage(roomId, message)
+            }
           }
           room.users[ip].lastActivity = Date.now()
           lastUpdated = Date.now() // 更新タイムスタンプを更新
