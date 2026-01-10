@@ -272,7 +272,8 @@ module.exports = async (req, res) => {
           roomId,
           name: room.name,
           description: room.description,
-          specialKeys: room.specialKeys
+          specialKeys: room.specialKeys,
+          options: room.options
         })
       } catch (error) {
         console.error('Error updating room:', error)

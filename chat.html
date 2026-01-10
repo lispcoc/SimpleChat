@@ -338,7 +338,7 @@
             document.getElementById('roomDescription')
           roomNameElement.textContent = data.name
           roomDescriptionElement.textContent = data.description.replace(
-            /\r/g,
+            /\n/g,
             '<br>'
           )
           document.title = `${data.name} - Chat Room`
