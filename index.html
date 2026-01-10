@@ -71,8 +71,7 @@
             i++
           })
         } else if (!response.ok) {
-          const errorData = await response.json()
-          alert(errorData.error)
+          alert(data.error)
         }
       }
 

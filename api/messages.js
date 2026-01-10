@@ -106,10 +106,6 @@ const flushMessagesToDB = async roomId => {
 
 // データベースからルーム情報をロード
 const loadRoomsFromDB = async () => {
-  if (roomDataLoading) {
-    return
-  }
-  roomDataLoading = true
   try {
     const query =
       'SELECT id, name, description, password, special_keys, options FROM rooms'
@@ -138,16 +134,12 @@ const loadRoomsFromDB = async () => {
   } catch (error) {
     console.error('Error loading rooms from database:', error)
   } finally {
-    roomDataLoading = false
   }
+  loadMessagesFromDB()
 }
 
 const loadMessagesFromDB = async () => {
-  if (roomMessageLoading) {
-    return
-  }
   if (roomDataLoaded) {
-    roomMessageLoading = true
     try {
       Object.keys(rooms).forEach(roomId => {
         const tableName = `messages_${roomId}`
@@ -174,7 +166,6 @@ const loadMessagesFromDB = async () => {
     } catch (error) {
       console.error('Error loading messages from database:', error)
     } finally {
-      roomMessageLoading = false
     }
   }
 }
@@ -236,14 +227,6 @@ module.exports = async (req, res) => {
       roomMessageLoaded: roomMessageLoaded,
       roomMessageLoading: roomMessageLoading
     })
-    return
-  }
-
-  await loadRooms()
-  if (!roomDataLoaded || !roomMessageLoaded) {
-    res
-      .status(400)
-      .json({ error: 'サービスの開始中です。しばらくお待ちください。' })
     return
   }
 
