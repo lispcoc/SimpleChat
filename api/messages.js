@@ -7,6 +7,61 @@ let rooms = {}
 let roomDataLoaded = false
 let currentRoomId = 0
 let roomCreateCount = {}
+const messageBuffer = {} // メッセージを一時的に保存するバッファ
+const BATCH_SIZE = 1 // バッチ書き込みのサイズ
+const BATCH_INTERVAL = 60 * 60 * 1000 // バッチ書き込みの間隔（ミリ秒）
+
+const createMessageTable = async roomId => {
+  const tableName = `messages_${roomId}`
+  const query = `
+    CREATE TABLE IF NOT EXISTS ${tableName} (
+      id SERIAL PRIMARY KEY,
+      text TEXT NOT NULL,
+      timestamp TIMESTAMP NOT NULL,
+      username VARCHAR(255),
+      system BOOLEAN DEFAULT FALSE
+    );
+  `
+  try {
+    await db.query(query)
+    console.log(`Table ${tableName} created or already exists.`)
+  } catch (error) {
+    console.error(`Error creating table ${tableName}:`, error)
+  }
+}
+
+// メッセージをデータベースに書き込む関数
+const flushMessagesToDB = async roomId => {
+  if (!messageBuffer[roomId] || messageBuffer[roomId].length === 0) {
+    return
+  }
+
+  const tableName = `messages_${roomId}`
+  await createMessageTable(roomId) // テーブルが存在しない場合は作成
+
+  const messagesToSave = messageBuffer[roomId]
+
+  try {
+    const query = `
+    INSERT INTO ${tableName} (text, timestamp, username, system)
+    VALUES ($1, $2, $3, $4);
+  `
+    const values = messagesToSave.flatMap(msg => [
+      msg.text,
+      new Date(msg.timestamp).toISOString(),
+      msg.username || null,
+      msg.system || false
+    ])
+
+    await db.query(query, values)
+    console.log(
+      `Flushed ${messagesToSave.length} messages to DB for room ${roomId}`
+    )
+    messageBuffer[roomId] = [] // バッファをクリア
+  } catch (error) {
+    console.error('Error flushing messages to DB:', error)
+  }
+}
 
 // データベースからルーム情報をロード
 const loadRoomsFromDB = async () => {
@@ -54,6 +109,17 @@ const addMessage = async (roomId, msg) => {
 
   if (room.messages.length > 100) {
     room.messages.shift()
+  }
+
+  // バッファにメッセージを追加
+  if (!messageBuffer[roomId]) {
+    messageBuffer[roomId] = []
+  }
+  messageBuffer[roomId].push(msg)
+
+  // バッファが一定サイズに達したらフラッシュ
+  if (messageBuffer[roomId].length >= BATCH_SIZE) {
+    flushMessagesToDB(roomId)
   }
 }
 
@@ -136,6 +202,8 @@ module.exports = async (req, res) => {
           options
         }
         roomCreateCount[ip] = Date.now()
+
+        await createMessageTable(id)
 
         res.status(201).json({
           success: true,
@@ -454,3 +522,8 @@ setInterval(() => {
     })
   })
 }, 60 * 1000) // 1分ごとにチェック
+
+// 定期的にバッファをフラッシュする
+setInterval(() => {
+  Object.keys(messageBuffer).forEach(roomId => flushMessagesToDB(roomId))
+}, BATCH_INTERVAL)
