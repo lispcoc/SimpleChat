@@ -146,8 +146,8 @@ const loadMessagesFromDB = async () => {
   if (roomMessageLoading) {
     return
   }
-  roomMessageLoading = true
   if (roomDataLoaded) {
+    roomMessageLoading = true
     try {
       Object.keys(rooms).forEach(roomId => {
         const tableName = `messages_${roomId}`
