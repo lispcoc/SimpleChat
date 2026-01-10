@@ -4,7 +4,11 @@ const db = require('./db')
 
 let lastUpdated = Date.now()
 let rooms = {}
+let roomLoadHandle
 let roomDataLoaded = false
+let roomDataLoading = false
+let roomMessageLoaded = false
+let roomMessageLoading = false
 let currentRoomId = 0
 let roomCreateCount = {}
 const messageBuffer = {} // メッセージを一時的に保存するバッファ
@@ -101,6 +105,10 @@ const flushMessagesToDB = async roomId => {
 
 // データベースからルーム情報をロード
 const loadRoomsFromDB = async () => {
+  if (roomDataLoading) {
+    return
+  }
+  roomDataLoading = true
   try {
     const query =
       'SELECT id, name, description, password, special_keys, options FROM rooms'
@@ -128,8 +136,16 @@ const loadRoomsFromDB = async () => {
     console.log('Rooms loaded from database:', rooms)
   } catch (error) {
     console.error('Error loading rooms from database:', error)
+  } finally {
+    roomDataLoading = false
   }
+}
 
+const loadMessagesFromDB = async () => {
+  if (roomMessageLoading) {
+    return
+  }
+  roomMessageLoading = true
   if (roomDataLoaded) {
     try {
       Object.keys(rooms).forEach(roomId => {
@@ -153,8 +169,11 @@ const loadRoomsFromDB = async () => {
           }
         })
       })
+      roomMessageLoaded = true
     } catch (error) {
       console.error('Error loading messages from database:', error)
+    } finally {
+      roomMessageLoading = false
     }
   }
 }
@@ -193,6 +212,13 @@ module.exports = async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
   const roomId = req.query.roomId // URL パラメータから roomId を取得
   const mode = req.query.mode
+
+  if (!roomDataLoaded || !roomMessageLoaded) {
+    res
+      .status(400)
+      .json({ error: 'サービスの開始中です。しばらくお待ちください。' })
+    return
+  }
 
   if (req.method === 'POST' && mode === 'createRoom') {
     if (Object.keys(rooms).length > MAX_ROOMS) {
@@ -596,3 +622,15 @@ setInterval(() => {
 setInterval(() => {
   Object.keys(messageBuffer).forEach(roomId => flushMessagesToDB(roomId))
 }, BATCH_INTERVAL)
+
+roomLoadHandle = setInterval(() => {
+  if (!roomDataLoaded) {
+    loadRoomsFromDB()
+  }
+  if (!roomMessageLoaded) {
+    loadMessagesFromDB()
+  }
+  if (roomDataLoaded && roomMessageLoaded) {
+    clearInterval(roomLoadHandle)
+  }
+}, 60 * 1000)
