@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const Dice = ({ Base, Version } = require('bcdice'))
 const db = require('./db')
+const supabase = require('./supabase')
 
 let currentRoomId = 0
 let roomCreateCount = {}
@@ -261,7 +262,9 @@ module.exports = async (req, res) => {
   const mode = req.query.mode
 
   if (req.method === 'GET' && mode === 'stats') {
-    res.status(200).json({})
+    res.status(200).json({
+      db: supabase.db
+    })
     return
   }
 

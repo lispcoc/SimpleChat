@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Chat</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 10px;
+        padding: 0;
+      }
+
+      #main {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="main">test</div>
+
+    <script>
+      const API_URL = '/api/messages'
+      const roomListDiv = document.getElementById('roomList')
+      const params = new URLSearchParams(window.location.search)
+
+      async function init() {
+        const params = new URLSearchParams({
+          mode: 'stats'
+        })
+        const response = await fetch(`${API_URL}?${params.toString()}`)
+        const data = await response.json()
+
+        if (response.status === 200) {
+          return data
+        } else if (!response.ok) {
+          alert(data.error)
+          return null
+        }
+      }
+
+      const db = init()
+      console.log(db)
+    </script>
+  </body>
+</html>
