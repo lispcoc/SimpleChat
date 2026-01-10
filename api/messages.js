@@ -444,6 +444,10 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
+    let users = getUsers(roomId)
+    if (users == null) {
+      users = []
+    }
     let body = ''
     req.on('data', chunk => {
       body += chunk.toString()
@@ -455,7 +459,6 @@ module.exports = async (req, res) => {
         const { action, text, username } = parsedBody
 
         if (action === 'enter') {
-          const users = getUsers(roomId) || []
           const usersLimit = room.options.usersLimit || 10
           if (users.length >= usersLimit) {
             res.status(400).json({ error: 'これ以上入室できません' })
@@ -493,7 +496,6 @@ module.exports = async (req, res) => {
           res.status(200).json({ success: true, message: 'Entered the room' })
         } else if (action === 'leave') {
           // 退室処理
-          const users = getUsers(roomId)
           const user = users.find(user => user.ip === ip)
           if (user) {
             addMessage(roomId, {
@@ -508,7 +510,6 @@ module.exports = async (req, res) => {
           res.status(200).json({ success: true, message: 'Left the room' })
         } else if (action === 'message') {
           // 入室しているか確認
-          const users = getUsers(roomId)
           const user = users.find(user => user.ip === ip)
           if (!user) {
             res.status(403).json({
