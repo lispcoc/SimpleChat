@@ -10,6 +10,7 @@ let roomDataLoaded = false
 let roomDataLoading = false
 let roomMessageLoaded = false
 let roomMessageLoading = false
+let flushingMessages = false
 let currentRoomId = 0
 let roomCreateCount = {}
 const messageBuffer = {} // メッセージを一時的に保存するバッファ
@@ -40,9 +41,13 @@ const createMessageTable = async roomId => {
 
 // メッセージをデータベースに書き込む関数
 const flushMessagesToDB = async roomId => {
+  if (flushingMessages) {
+    return
+  }
   if (!messageBuffer[roomId] || messageBuffer[roomId].length === 0) {
     return
   }
+  flushingMessages = true
 
   const tableName = `messages_${roomId}`
   await createMessageTable(roomId) // テーブルが存在しない場合は作成
@@ -102,6 +107,7 @@ const flushMessagesToDB = async roomId => {
   } catch (error) {
     console.error('Error flushing messages to DB:', error, placeholders)
   }
+  flushingMessages = false
 }
 
 // データベースからルーム情報をロード
