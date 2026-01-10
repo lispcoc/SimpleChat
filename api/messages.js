@@ -42,22 +42,35 @@ const flushMessagesToDB = async roomId => {
   const messagesToSave = messageBuffer[roomId]
 
   try {
-    const query = `
-    INSERT INTO ${tableName} (text, color, timestamp, username, system)
-    VALUES ($1, $2, $3, $4, $5);
-  `
-    const values = messagesToSave.flatMap(msg => [
-      msg.text,
-      0,
-      new Date(msg.timestamp).toISOString(),
-      msg.username || 'Unknown',
-      msg.system || false
-    ])
+    // INSERT クエリをバッチ形式で構築
+    const values = []
+    const placeholders = messagesToSave
+      .map((msg, index) => {
+        const baseIndex = index * 5 // 1メッセージあたり5つの値
+        values.push(
+          msg.text,
+          0, // color のデフォルト値
+          new Date(msg.timestamp).toISOString(),
+          msg.username || 'Unknown',
+          msg.system || false
+        )
+        return `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${
+          baseIndex + 4
+        }, $${baseIndex + 5})`
+      })
+      .join(', ')
 
+    const query = `
+      INSERT INTO ${tableName} (text, color, timestamp, username, system)
+      VALUES ${placeholders};
+    `
+
+    // クエリを実行
     await db.query(query, values)
     console.log(
       `Flushed ${messagesToSave.length} messages to DB for room ${roomId}`
     )
+
     messageBuffer[roomId] = [] // バッファをクリア
   } catch (error) {
     console.error('Error flushing messages to DB:', error)
