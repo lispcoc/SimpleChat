@@ -50,7 +50,7 @@ const flushMessagesToDB = async roomId => {
       msg.text,
       0,
       msg.timestamp,
-      msg.username || null,
+      msg.username || 'Unknown',
       msg.system || false
     ])
 
