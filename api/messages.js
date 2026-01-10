@@ -649,6 +649,6 @@ const loadRooms = () => {
   }
 }
 
-roomLoadHandle = setInterval(loadRooms, 60 * 1000)
+roomLoadHandle = setInterval(loadRooms, 10 * 1000)
 
 loadRooms()
