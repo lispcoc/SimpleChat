@@ -11,14 +11,15 @@ const MAX_ROOMS = 1000
 
 const getRoomList = async () => {
   try {
-    const query = `SELECT id, name FROM rooms`
+    const query = `SELECT id, name, created_at FROM rooms`
     const result = await db.query(query)
     if (!result.rows || !result.rows[0]) {
       return []
     }
     const roomList = result.rows.map(row => {
-      return { id: row.id, name: row.name }
+      return { id: row.id, name: row.name, created_at: row.created_at }
     })
+    roomList.sort((a, b) => a.created_at > b.created_at)
     return roomList
   } catch (error) {
     console.error(`Error getRoomList:`, error)
