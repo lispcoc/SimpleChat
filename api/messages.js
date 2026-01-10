@@ -112,7 +112,7 @@ module.exports = async (req, res) => {
         // データベースに保存
         const query = `
           INSERT INTO rooms (name, description, password, special_keys, options, created_at)
-          VALUES ($1, $2, $3, $4, $5, $6, NOW())
+          VALUES ($1, $2, $3, $4, $5, NOW())
           RETURNING id;
         `
         const values = [
