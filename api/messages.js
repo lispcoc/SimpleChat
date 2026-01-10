@@ -128,27 +128,33 @@ const loadRoomsFromDB = async () => {
     console.error('Error loading rooms from database:', error)
   }
 
-  Object.keys(rooms).forEach(roomId => {
-    const tableName = `messages_${roomId}`
-    const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
-    db.query(messageQuery).then(messageResults => {
-      if (messageResults.rows) {
-        messageResults.rows.forEach(row => {
-          addMessage(
-            roomId,
-            {
-              text: row.text,
-              color: row.color,
-              timestamp: row.timestamp,
-              username: row.username,
-              system: row.system
-            },
-            false
-          )
+  if (roomDataLoaded) {
+    try {
+      Object.keys(rooms).forEach(roomId => {
+        const tableName = `messages_${roomId}`
+        const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
+        db.query(messageQuery).then(messageResults => {
+          if (messageResults.rows) {
+            messageResults.rows.forEach(row => {
+              addMessage(
+                roomId,
+                {
+                  text: row.text,
+                  color: row.color,
+                  timestamp: row.timestamp,
+                  username: row.username,
+                  system: row.system
+                },
+                false
+              )
+            })
+          }
         })
-      }
-    })
-  })
+      })
+    } catch (error) {
+      console.error('Error loading messages from database:', error)
+    }
+  }
 }
 
 const getRoom = async roomId => {
