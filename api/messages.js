@@ -120,6 +120,38 @@ const deleteUser = async (roomId, user) => {
   }
 }
 
+const refleshUser = async (roomId, user) => {
+  const tableName = `users_${roomId}`
+  const queryRoom = `
+            UPDATE ${tableName}
+            SET lastactivity = $2
+            WHERE ip = $1
+          `
+  try {
+    const valuesRoom = [user.ip, new Date(Date.now()).toISOString()]
+    await db.query(queryRoom, valuesRoom)
+  } catch (error) {
+    console.error('Error refleshUser:', error)
+  }
+}
+
+const deleteInactiveUser = async (roomId, users) => {
+  try {
+    await users.forEach(user => {
+      if (Date.now() - user.lastactivity > 20 * 60 * 1000) {
+        deleteUser(roomId, user)
+        addMessage(roomId, {
+          text: `${user.username} さんが非アクティブのため退室しました。`,
+          timestamp: Date.now(),
+          system: true
+        })
+      }
+    })
+  } catch (error) {
+    console.error('Error deleteInactiveUser:', error)
+  }
+}
+
 // データベースからルーム情報をロード
 const loadRoomInfoFromDB = async roomId => {
   try {
@@ -541,6 +573,7 @@ module.exports = async (req, res) => {
             username: user.username
           }
           addMessage(roomId, message)
+          refleshUser(roomId, user)
 
           if (room.specialKeys[text] && room.specialKeys[text].length) {
             const specialText =
@@ -581,11 +614,11 @@ module.exports = async (req, res) => {
       req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
     const users = await getUsers(roomId)
+    await deleteInactiveUser(roomId, users)
     const user = users.find(user => user.ip === ip)
     if (room.options.private && !user) {
       res.status(204).end()
     } else if (room.lastUpdated > clientLastUpdated) {
-      // todo: 更新があったときだけ送信する
       const messages = await loadMessagesFromDB(roomId)
       res.status(200).json({
         messages: messages.slice(-20),
