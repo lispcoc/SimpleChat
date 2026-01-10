@@ -121,11 +121,7 @@
       </div>
       <div id="inputDiv" style="display: none">
         <span id="usernameDisplay" class="username"></span>
-        <input
-          type="text"
-          id="messageInput"
-          placeholder="Type your message..."
-        />
+        <input type="text" id="messageInput" placeholder="" />
         <button id="sendButton">発言</button>
       </div>
 
@@ -314,7 +310,10 @@
       // メッセージ送信
       async function sendMessage() {
         const text = messageInput.value
-        if (text) {
+        if (!text) return
+
+        sendButton.disabled = true
+        try {
           const params = new URLSearchParams({
             roomId: roomId
           })
@@ -331,6 +330,11 @@
             const errorData = await response.json()
             alert(errorData.error)
           }
+        } catch (error) {
+          console.error('Error sending message:', error)
+          alert('メッセージ送信中にエラーが発生しました。')
+        } finally {
+          sendButton.disabled = false
         }
       }
 
