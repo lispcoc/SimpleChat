@@ -439,13 +439,17 @@ module.exports = async (req, res) => {
         const { action, text, username } = parsedBody
 
         if (action === 'enter') {
-          // 既に入室している場合は無視
+          const usersLimit = room.options.usersLimit || 10
+          if (Object.keys(room.users).length >= usersLimit) {
+            res.status(400).json({ error: 'これ以上入室できません' })
+            return
+          }
+
           if (room.users[ip]) {
             res.status(200).json({ success: true, message: '既に入室済みです' })
             return
           }
 
-          // 入室処理
           if (!username || username.trim() === '') {
             res.status(400).json({ error: '名前を入力してください' })
             return

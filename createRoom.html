@@ -73,6 +73,18 @@
           <option value="false">許可しない</option>
         </select>
 
+        <label for="roomOptionUsersLimit">入室人数上限</label>
+        <select name="roomOptionUsersLimit" id="roomOptionUsersLimit">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="10" selected>10</option>
+        </select>
+
         <label for="roomPassword">パスワード (必須)</label>
         <input
           type="password"
@@ -132,8 +144,13 @@
         const roomOptionPrivate =
           document.getElementById('roomOptionPrivate').value.trim() === 'true'
 
+        const roomOptionUsersLimit = parseInt(
+          document.getElementById('roomOptionUsersLimit').value.trim()
+        )
+
         let roomOptions = {
-          private: roomOptionPrivate
+          private: roomOptionPrivate,
+          usersLimit: roomOptionUsersLimit
         }
 
         if (!roomName || !roomDescription || !roomPassword) {
