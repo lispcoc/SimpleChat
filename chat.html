@@ -202,8 +202,14 @@
           updateUI() // UI を更新
         }
       }
+
+      let fetchingMessage = false
       // メッセージを取得して表示
       async function fetchMessages() {
+        if (fetchingMessage) {
+          return
+        }
+        fetchingMessage = true
         try {
           const params = new URLSearchParams({
             lastUpdated: lastUpdated,
@@ -251,8 +257,10 @@
           }
         } catch (error) {
           console.error('Error fetching messages:', error)
+        } finally {
+          fetchingMessage = false
+          progressDiv.innerText = ' '
         }
-        progressDiv.innerText = ' '
       }
 
       // 入室

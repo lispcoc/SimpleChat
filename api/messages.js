@@ -420,6 +420,8 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET' && mode === 'users') {
+    const clientIp =
+      req.headers['x-forwarded-for'] || req.connection.remoteAddress
     const users = await getUsers(roomId)
     await deleteInactiveUser(roomId, users)
     res.status(200).json({
