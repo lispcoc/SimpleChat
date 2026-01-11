@@ -225,9 +225,12 @@
 
             // メッセージを表示
             const messagesDiv = document.getElementById('messages')
+            let newLastUpdated = lastUpdated
             data.messages.slice().forEach(msg => {
               if (lastUpdated < Date.parse(msg.timestamp)) {
-                lastUpdated = Date.parse(msg.timestamp)
+                if (newLastUpdated < Date.parse(msg.timestamp)) {
+                  newLastUpdated = Date.parse(msg.timestamp)
+                }
                 const messageElement = document.createElement('span')
                 if (msg.system) {
                   // システムメッセージのスタイル
@@ -254,6 +257,7 @@
                 messagesDiv.prepend(hr)
               }
             })
+            lastUpdated = newLastUpdated
             messagesDiv.scrollTop = messagesDiv.scrollHeight
           }
         } catch (error) {
