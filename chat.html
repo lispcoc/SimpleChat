@@ -216,40 +216,41 @@
             roomId: roomId
           })
           progressDiv.innerText = '更新中...'
-          const fetchTime = Date.now()
           const response = await fetch(`${API_URL}?${params.toString()}`)
           if (response.status === 200) {
             const data = await response.json()
             console.log(data)
-            lastUpdated = fetchTime
 
             // メッセージを表示
             const messagesDiv = document.getElementById('messages')
             data.messages.slice().forEach(msg => {
-              const messageElement = document.createElement('span')
-              if (msg.system) {
-                // システムメッセージのスタイル
-                messageElement.style.color = 'gray'
-                messageElement.textContent = `[SYSTEM] ${msg.text}`
-              } else {
-                // 通常メッセージ
-                const username = msg.username || 'Unknown'
-                const usenameElement = document.createElement('span')
-                usenameElement.className = 'username'
-                usenameElement.textContent = `${username}`
-                messageElement.textContent = `> ${msg.text}`
-                messageElement.prepend(usenameElement)
+              if (lastUpdated < msg.timestamp) {
+                lastUpdated = msg.timestamp
+                const messageElement = document.createElement('span')
+                if (msg.system) {
+                  // システムメッセージのスタイル
+                  messageElement.style.color = 'gray'
+                  messageElement.textContent = `[SYSTEM] ${msg.text}`
+                } else {
+                  // 通常メッセージ
+                  const username = msg.username || 'Unknown'
+                  const usenameElement = document.createElement('span')
+                  usenameElement.className = 'username'
+                  usenameElement.textContent = `${username}`
+                  messageElement.textContent = `> ${msg.text}`
+                  messageElement.prepend(usenameElement)
+                }
+                messagesDiv.prepend(messageElement)
+                if (msg.timestamp) {
+                  const formattedTime = new Date(msg.timestamp).toLocaleString()
+                  const timestampElement = document.createElement('span')
+                  timestampElement.className = 'timestamp'
+                  timestampElement.textContent = ` (${formattedTime})`
+                  messageElement.appendChild(timestampElement)
+                }
+                const hr = document.createElement('hr')
+                messagesDiv.prepend(hr)
               }
-              messagesDiv.prepend(messageElement)
-              if (msg.timestamp) {
-                const formattedTime = new Date(msg.timestamp).toLocaleString()
-                const timestampElement = document.createElement('span')
-                timestampElement.className = 'timestamp'
-                timestampElement.textContent = ` (${formattedTime})`
-                messageElement.appendChild(timestampElement)
-              }
-              const hr = document.createElement('hr')
-              messagesDiv.prepend(hr)
             })
             messagesDiv.scrollTop = messagesDiv.scrollHeight
 
