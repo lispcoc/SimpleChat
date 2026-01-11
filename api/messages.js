@@ -184,7 +184,7 @@ const loadMessagesFromDB = async (roomId, timestamp = null) => {
     const tableName = `messages_${roomId}`
 
     const messageQuery = timestamp
-      ? `SELECT text, color, timestamp, username, system FROM ${tableName} WHERE > '${new Date(
+      ? `SELECT text, color, timestamp, username, system FROM ${tableName} WHERE timestamp > '${new Date(
           timestamp
         ).toISOString()}'`
       : `SELECT text, color, timestamp, username, system FROM ${tableName}`
