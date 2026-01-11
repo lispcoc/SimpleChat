@@ -216,11 +216,8 @@
 
             // メッセージを表示
             const messagesDiv = document.getElementById('messages')
-            const pastLog = messagesDiv.innerHTML
-            messagesDiv.innerHTML = ''
             data.messages
               .slice()
-              .reverse()
               .forEach(msg => {
                 const messageElement = document.createElement('span')
                 if (msg.system) {
@@ -234,7 +231,7 @@
                   usenameElement.className = 'username'
                   usenameElement.textContent = `${username}`
                   messageElement.textContent = `> ${msg.text}`
-                  messagesDiv.appendChild(usenameElement)
+                  messagesDiv.prepend(usenameElement)
                 }
                 messagesDiv.appendChild(messageElement)
                 if (msg.timestamp) {
@@ -245,9 +242,8 @@
                   messageElement.appendChild(timestampElement)
                 }
                 const hr = document.createElement('hr')
-                messagesDiv.appendChild(hr)
+                messagesDiv.prepend(hr)
               })
-            messagesDiv.innerHTML += pastLog
             messagesDiv.scrollTop = messagesDiv.scrollHeight
 
             // 入室者一覧を更新
