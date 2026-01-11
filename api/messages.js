@@ -188,7 +188,6 @@ const loadMessagesFromDB = async (roomId, timestamp = null) => {
           timestamp
         ).toISOString()}'`
       : `SELECT text, color, timestamp, username, system FROM ${tableName}`
-    console.log(messageQuery)
     const result = await db.query(messageQuery)
 
     if (!result.rows || !result.rows[0]) {
@@ -257,7 +256,7 @@ const addMessage = async (roomId, msg) => {
     console.log(
       `Deleted old messages from ${tableName} to maintain the limit of ${MAX_MESSAGES_PER_TABLE}`
     )
-  } catch {
+  } catch (error) {
     console.error('Error addMessage:', error)
   }
 }
