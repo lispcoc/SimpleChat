@@ -306,10 +306,12 @@
         }
       }
 
+      let messageSending = false
       // メッセージ送信
       async function sendMessage() {
         const text = messageInput.value
-        if (!text) return
+        if (!text || messageSending) return
+        messageSending = true
 
         sendButton.disabled = true
         try {
@@ -334,6 +336,7 @@
           alert('メッセージ送信中にエラーが発生しました。')
         } finally {
           sendButton.disabled = false
+          messageSending = false
         }
       }
 
