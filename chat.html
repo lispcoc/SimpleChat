@@ -216,7 +216,8 @@
 
             // メッセージを表示
             const messagesDiv = document.getElementById('messages')
-            messagesDiv.innerHTML = '' // メッセージをクリア
+            const pastLog = messagesDiv.innerHTML
+            messagesDiv.innerHTML = ''
             data.messages
               .slice()
               .reverse()
@@ -246,7 +247,7 @@
                 const hr = document.createElement('hr')
                 messagesDiv.appendChild(hr)
               })
-
+            messagesDiv.innerHTML += pastLog
             messagesDiv.scrollTop = messagesDiv.scrollHeight
 
             // 入室者一覧を更新

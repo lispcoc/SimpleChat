@@ -20,7 +20,7 @@ const getRoomList = async () => {
     const roomList = result.rows.map(row => {
       return { id: row.id, name: row.name, created_at: row.created_at }
     })
-    roomList.sort((a, b) => a.created_at > b.created_at)
+    //roomList.sort((a, b) => a.created_at > b.created_at)
     return roomList
   } catch (error) {
     console.error(`Error getRoomList:`, error)
@@ -179,10 +179,15 @@ const loadRoomInfoFromDB = async roomId => {
   return null
 }
 
-const loadMessagesFromDB = async roomId => {
+const loadMessagesFromDB = async (roomId, timestamp = null) => {
   try {
     const tableName = `messages_${roomId}`
-    const messageQuery = `SELECT text, color, timestamp, username, system FROM ${tableName}`
+
+    const messageQuery = timestamp
+      ? `SELECT text, color, timestamp, username, system FROM ${tableName} WHERE > ${new Date(
+          timestamp
+        ).toISOString()}`
+      : `SELECT text, color, timestamp, username, system FROM ${tableName}`
     const result = await db.query(messageQuery)
 
     if (!result.rows || !result.rows[0]) {
@@ -623,7 +628,7 @@ module.exports = async (req, res) => {
     if (room.options.private && !user) {
       res.status(204).end()
     } else if (room.lastUpdated > clientLastUpdated) {
-      const messages = await loadMessagesFromDB(roomId)
+      const messages = await loadMessagesFromDB(roomId, clientLastUpdated)
       res.status(200).json({
         messages: messages.slice(-20),
         users: users || [],
