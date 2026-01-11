@@ -216,11 +216,12 @@
             roomId: roomId
           })
           progressDiv.innerText = '更新中...'
+          const fetchTime = Date.now()
           const response = await fetch(`${API_URL}?${params.toString()}`)
           if (response.status === 200) {
             const data = await response.json()
             console.log(data)
-            lastUpdated = data.lastUpdated // サーバーから最新の更新タイムスタンプを取得
+            lastUpdated = fetchTime
 
             // メッセージを表示
             const messagesDiv = document.getElementById('messages')
