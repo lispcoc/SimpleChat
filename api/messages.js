@@ -419,6 +419,16 @@ module.exports = async (req, res) => {
     return
   }
 
+  if (req.method === 'GET' && mode === 'users') {
+    const users = await getUsers(roomId)
+    await deleteInactiveUser(roomId, users)
+    res.status(200).json({
+      users: users || [],
+      clientIp
+    })
+    return
+  }
+
   if (req.method === 'GET' && mode === 'roomInfo') {
     // ルーム情報を返すエンドポイント
     if (!roomId) {

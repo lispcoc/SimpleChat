@@ -173,7 +173,8 @@
       // 入室者一覧を取得して表示
       async function fetchUsers() {
         const params = new URLSearchParams({
-          roomId: roomId
+          roomId: roomId,
+          mode: 'users'
         })
         const response = await fetch(`${API_URL}?${params.toString()}`)
         const data = await response.json()
@@ -212,6 +213,7 @@
           const response = await fetch(`${API_URL}?${params.toString()}`)
           if (response.status === 200) {
             const data = await response.json()
+            console.log(data)
             lastUpdated = data.lastUpdated // サーバーから最新の更新タイムスタンプを取得
 
             // メッセージを表示
@@ -250,7 +252,7 @@
         } catch (error) {
           console.error('Error fetching messages:', error)
         }
-        progressDiv.innerText = ''
+        progressDiv.innerText = ' '
       }
 
       // 入室
