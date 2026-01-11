@@ -406,11 +406,11 @@
 
       // メッセージを定期的に取得
       function pollMessages(interval = 5 * 1000) {
-        fetchMessages().then(() => {
+        fetchMessages().finally(() => {
           setTimeout(() => {
             pollMessages(interval)
           }, interval)
-        })
+        }).
       }
 
       // 初期化処理
